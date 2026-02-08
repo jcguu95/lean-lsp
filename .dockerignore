@@ -1,0 +1,6 @@
+# Ignore git repository
+.git
+
+# Ignore lake build artifacts and packages
+.lake/
+build/

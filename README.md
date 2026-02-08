@@ -8,6 +8,7 @@ It includes a `Dockerfile` to set up a development environment with `aider`, `le
 ### Prerequisites
 - Docker must be installed on your system.
 - You need a Gemini API key.
+- Lean and Lake must be installed and available in your PATH.
 
 ### 1. Build the Docker Image
 First, build the Docker image from the `Dockerfile`. This image will contain `aider`, `lean`, and `lake`.
@@ -44,7 +45,7 @@ docker run -it --rm \
 
 ## Testing
 
-To run the tests for `scripts/lean-lsp`, run this command:
+To run the tests for `scripts/lean-lsp` locally, make sure you have Lean and Lake installed and available in your PATH, then run this command:
 
 ```bash
 python3 -m pytest

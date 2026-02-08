@@ -10,5 +10,5 @@ package «lean_project» where
   -- add package configuration options here
 
 @[default_target]
-lean_lib «LeanProject» where
-  -- add library configuration options here
+lean_exe «lean_project» where
+  root := `Main

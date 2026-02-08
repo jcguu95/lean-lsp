@@ -25,5 +25,11 @@ ENV PATH="/opt/elan/bin:$PATH"
 # Set the working directory in the container.
 WORKDIR /app
 
+# Copy the project files.
+COPY . .
+
+# Build the project. This will download the toolchain and cache it.
+RUN lake build
+
 # Switch back to the default user from the base image.
 USER aider

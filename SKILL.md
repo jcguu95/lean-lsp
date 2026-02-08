@@ -45,5 +45,3 @@ file at a specific cursor position.
 - Auto-start uses the current working directory and default server command.
 - For custom root or server cmd, run `scripts/lean-lsp start` first.
 - Socket path defaults to `LEAN_LSP_SOCKET` or `./lean-lsp.sock`.
-- This skill bundles the `lean-lsp` script next to `SKILL.md`.
-- `scripts/lean-lsp` is a wrapper that calls the bundled script.

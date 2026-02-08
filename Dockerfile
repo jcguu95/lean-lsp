@@ -25,14 +25,18 @@ ENV PATH="/opt/elan/bin:$PATH"
 # Set the working directory in the container.
 WORKDIR /app
 
-# Copy project configuration to leverage Docker layer caching.
-COPY lakefile.lean Lean.toml ./
-RUN lake update
+# Copy project configuration and version-locking files to leverage Docker layer caching.
+# This ensures this layer is only re-run if dependencies change.
+COPY lakefile.lean Lean.toml lake-manifest.json lean-toolchain ./
+
+# Fetch the toolchain and dependencies from the lockfiles.
+RUN lake setup-toolchain
+RUN lake exe cache get
 
 # Copy the rest of the project files.
 COPY . .
 
-# Build the project. This will download the toolchain and cache it.
+# Build the project. This will now only compile local files.
 RUN lake build
 
 # Switch back to the default user from the base image.

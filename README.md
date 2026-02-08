@@ -19,9 +19,13 @@ docker build -t lean-aider .
 Note: The Docker image is managed by the Docker daemon and stored in Docker's internal storage, not in your project directory. You can see the built image by running `docker images | grep lean-aider`.
 
 ### 2. Start an Aider Session
-To start an `aider` session within the Docker container, run the following command.
+To start an `aider` session within the Docker container, first export your Gemini API key:
 
-You will need to replace `your-gemini-api-key` with your actual Gemini API key.
+```bash
+export GEMINI_API_KEY="your-gemini-api-key"
+```
+
+Then, run the following command. It passes your API key and Git configuration into the container.
 
 ```bash
 docker run -it --rm \
@@ -31,7 +35,7 @@ docker run -it --rm \
   --env GIT_AUTHOR_EMAIL="$(git config user.email)" \
   --env GIT_COMMITTER_NAME="$(git config user.name)" \
   --env GIT_COMMITTER_EMAIL="$(git config user.email)" \
-  --env GEMINI_API_KEY="your-gemini-api-key" \
+  --env GEMINI_API_KEY \
   lean-aider \
   --model gemini/gemini-1.5-pro \
   --no-stream \

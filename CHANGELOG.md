@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `Mathlib` dependency to use the `ring` tactic.
 - Added `twice` function and a theorem to `Main.lean` to demonstrate LSP features.
 
+### Fixed
+- The Docker build now runs `lake update` to fetch dependencies before building, and the Dockerfile is optimized for layer caching.
+
 ## [0.1.0] - 2026-02-08
 
 ### Added

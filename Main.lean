@@ -1,3 +1,5 @@
+import Mathlib.Tactic.Ring
+
 def twice (x : Nat) : Nat :=
   x + x
 

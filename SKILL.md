@@ -14,6 +14,13 @@ metadata:
 Use this when an agent needs goal state, term goals, or diagnostics from a Lean
 file at a specific cursor position.
 
+## Requirements
+- `lean` and `lake` must be installed and available in your `PATH`.
+- The `lake serve` command is used by default to start the LSP server.
+- The recommended way to install Lean and Lake is via the `elan` toolchain manager.
+- A base Lean installation is several hundred megabytes. Project dependencies will require additional space.
+- For Docker environments, it's recommended to add the `elan` installation to your `Dockerfile` to avoid re-installing on every container start.
+
 ## Commands
 - Start the daemon:
   - `scripts/lean-lsp start --root .`

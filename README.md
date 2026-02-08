@@ -41,3 +41,19 @@ docker run -it --rm \
   --no-stream \
   --weak-model gemini/gemini-1.5-flash
 ```
+
+## Testing
+
+To run the tests for `scripts/lean-lsp`, first install `pytest` inside the Docker container:
+
+```bash
+pip install --user pytest
+```
+
+This command installs `pytest` in your user's local package directory, which avoids permission errors with the system-wide virtual environment.
+
+Then, run the tests using this command:
+
+```bash
+python3 -m pytest
+```

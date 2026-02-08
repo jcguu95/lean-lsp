@@ -46,6 +46,3 @@ RUN lake build
 # The server's output is redirected to /dev/null to avoid cluttering the Docker logs.
 # The server is started with & to run in the background.
 RUN lake serve &
-
-# Switch back to the default user from the base image.
-USER aider

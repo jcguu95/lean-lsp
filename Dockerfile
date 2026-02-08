@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install elan to a shared location /opt/elan
 ENV ELAN_HOME=/opt/elan
-RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable --no-modify-path
+RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:nightly --no-modify-path
 RUN chmod -R a+rwx /opt/elan
 
 # Add elan to PATH for all users.

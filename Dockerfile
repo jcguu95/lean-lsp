@@ -27,7 +27,7 @@ WORKDIR /app
 
 # Copy project configuration and version-locking files to leverage Docker layer caching.
 # This ensures this layer is only re-run if dependencies change.
-COPY lakefile.lean Lean.toml lake-manifest.json lean-toolchain ./
+COPY lakefile.lean Lean.toml lean-toolchain ./
 
 # Fetch the toolchain and dependencies from the lockfiles.
 RUN lake update && lake exe cache get

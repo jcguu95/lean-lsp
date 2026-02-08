@@ -37,9 +37,9 @@ docker run -it --rm \
   --env GIT_AUTHOR_EMAIL="$(git config user.email)" \
   --env GIT_COMMITTER_NAME="$(git config user.name)" \
   --env GIT_COMMITTER_EMAIL="$(git config user.email)" \
-  --env GEMINI_API_KEY \
+  --env GEMINI_API_KEY="YOUR_API_KEY" \
   lean-aider \
-  --model gemini/gemini-1.5-pro \
+  --model gemini/gemini-2.5-pro \
   --no-stream \
   --weak-model gemini/gemini-1.5-flash
 ```
@@ -56,10 +56,6 @@ To run the tests for `scripts/lean-lsp` locally, make sure you have Lean and Lak
     -   On Linux/macOS:
         ```bash
         source venv/bin/activate
-        ```
-    -   On Windows:
-        ```bash
-        .\venv\Scripts\activate
         ```
 3.  **Install pytest:**
     ```bash

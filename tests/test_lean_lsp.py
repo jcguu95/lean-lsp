@@ -26,21 +26,21 @@ def test_start_stop_check(tmp_path):
     socket_path = tmp_path / "lean-lsp.sock"
 
     # Start the daemon. --wait ensures it's ready.
-    start_proc = run_lsp_cmd("start", "--socket", socket_path, "--wait", "10")
+    start_proc = run_lsp_cmd("--socket", socket_path, "start", "--wait", "10")
     assert "started" in start_proc.stdout.strip()
 
     # Check if it's running.
-    check_proc_running = run_lsp_cmd("check", "--socket", socket_path)
+    check_proc_running = run_lsp_cmd("--socket", socket_path, "check")
     assert "ok" in check_proc_running.stdout.strip()
 
     # Stop the daemon.
-    stop_proc = run_lsp_cmd("stop", "--socket", socket_path)
+    stop_proc = run_lsp_cmd("--socket", socket_path, "stop")
     assert "stopped" in stop_proc.stdout.strip()
 
     # Give the daemon a moment to shut down and clean up the socket.
     time.sleep(0.5)
 
     # Check that it's stopped. This should exit with 1.
-    result = run_lsp_cmd("check", "--socket", socket_path, check=False)
+    result = run_lsp_cmd("--socket", socket_path, "check", check=False)
     assert result.returncode == 1
     assert "not running" in result.stderr.strip()

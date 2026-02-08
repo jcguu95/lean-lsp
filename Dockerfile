@@ -30,7 +30,6 @@ WORKDIR /app
 COPY lakefile.lean Lean.toml lake-manifest.json lean-toolchain ./
 
 # Fetch the toolchain and dependencies from the lockfiles.
-RUN lake setup
 RUN lake exe cache get
 
 # Copy the rest of the project files.

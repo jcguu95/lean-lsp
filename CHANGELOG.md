@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Pinned `mathlib` dependency and Lean toolchain to stable versions to improve build reproducibility and reduce downloads.
+
 ### Added
 - Added `Mathlib` dependency to use the `ring` tactic.
 - Added `twice` function and a theorem to `Main.lean` to demonstrate LSP features.

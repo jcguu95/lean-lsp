@@ -16,6 +16,8 @@ First, build the Docker image from the `Dockerfile`. This image will contain `ai
 docker build -t lean-aider .
 ```
 
+Note: The Docker image is managed by the Docker daemon and stored in Docker's internal storage, not in your project directory. You can see the built image by running `docker images | grep lean-aider`.
+
 ### 2. Start an Aider Session
 To start an `aider` session within the Docker container, run the following command.
 

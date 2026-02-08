@@ -8,4 +8,4 @@ theorem twice_twice (x : Nat) : twice (twice x) = 4 * x := by
   ring
 
 def main : IO Unit :=
-  IO.println s!"Hello, {twice 3}!"
+  IO.println s!"Hey, {twice 3}!"

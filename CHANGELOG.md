@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated the "Hello, world!" greeting in `Main.lean` to be more casual.
+
+### Added
+- Added `twice` function and a theorem to `Main.lean` to demonstrate LSP features.
+- Added `Mathlib` dependency to use the `ring` tactic.
+
+### Fixed
+- Resolved persistent Docker build failures by optimizing layer caching, pinning a stable toolchain and dependencies, and correctly managing the build context with `.dockerignore`.
+
 ## [0.2.0] - 2026-02-08
 
 ### Changed

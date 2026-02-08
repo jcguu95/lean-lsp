@@ -9,6 +9,7 @@ It includes a `Dockerfile` to set up a development environment with `aider`, `le
 - Docker must be installed on your system.
 - You need a Gemini API key.
 - Lean and Lake must be installed and available in your PATH.
+- Python 3 and `pytest` must be installed.
 
 ### 1. Build the Docker Image
 First, build the Docker image from the `Dockerfile`. This image will contain `aider`, `lean`, and `lake`.
@@ -45,8 +46,26 @@ docker run -it --rm \
 
 ## Testing
 
-To run the tests for `scripts/lean-lsp` locally, make sure you have Lean and Lake installed and available in your PATH, then run this command:
+To run the tests for `scripts/lean-lsp` locally, make sure you have Lean and Lake installed and available in your PATH.
 
-```bash
-python3 -m pytest
-```
+1.  **Create a virtual environment:**
+    ```bash
+    python3 -m venv venv
+    ```
+2.  **Activate the virtual environment:**
+    -   On Linux/macOS:
+        ```bash
+        source venv/bin/activate
+        ```
+    -   On Windows:
+        ```bash
+        .\venv\Scripts\activate
+        ```
+3.  **Install pytest:**
+    ```bash
+    pip install pytest
+    ```
+4.  **Run the tests:**
+    ```bash
+    python3 -m pytest
+    ```

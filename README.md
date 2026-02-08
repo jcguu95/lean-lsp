@@ -33,7 +33,7 @@ docker run -it --rm \
   --env GIT_COMMITTER_EMAIL="$(git config user.email)" \
   --env GEMINI_API_KEY="your-gemini-api-key" \
   lean-aider \
-  --model gemini/gemini-2.5-pro \
+  --model gemini/gemini-1.5-pro \
   --no-stream \
-  --weak-model gemini/gemini-2.0-flash-lite
+  --weak-model gemini/gemini-1.5-flash
 ```

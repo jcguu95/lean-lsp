@@ -4,3 +4,9 @@
 # Ignore lake build artifacts and packages
 .lake/
 build/
+lake-manifest.json
+
+# Ignore files already copied in previous layers
+lakefile.lean
+Lean.toml
+lean-toolchain

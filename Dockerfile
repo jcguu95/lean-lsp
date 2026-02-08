@@ -38,5 +38,14 @@ COPY . .
 # Build the project. This will now only compile local files.
 RUN lake build
 
+# Start the Lean LSP server in the background.
+# The server will listen on a Unix domain socket.
+# The socket path is determined by the --socket argument, or the LEAN_LSP_SOCKET environment variable,
+# or defaults to ./lean-lsp.sock
+# The server command is determined by the --server-cmd argument, or defaults to "lake serve"
+# The server's output is redirected to /dev/null to avoid cluttering the Docker logs.
+# The server is started with & to run in the background.
+RUN lake serve &
+
 # Switch back to the default user from the base image.
 USER aider

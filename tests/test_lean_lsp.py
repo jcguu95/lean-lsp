@@ -2,6 +2,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+import json
 
 import pytest
 
@@ -44,3 +45,22 @@ def test_start_stop_check(tmp_path):
     result = run_lsp_cmd("--socket", socket_path, "check", check=False)
     assert result.returncode == 1
     assert "not running" in result.stderr.strip()
+
+
+def test_ping(tmp_path):
+    """Test the daemon's ping functionality."""
+    socket_path = tmp_path / "lean-lsp.sock"
+    # Start the daemon. --wait ensures it's ready.
+    start_proc = run_lsp_cmd("--socket", socket_path, "start", "--wait", "10")
+    assert "started" in start_proc.stdout.strip()
+
+    # Send a ping request.
+    ping_proc = run_lsp_cmd("--socket", socket_path, "request", "--method", "$/lean/ping", "--timeout", "5")
+    assert ping_proc.returncode == 0
+    response = json.loads(ping_proc.stdout)
+    assert response["ok"]
+    assert response["result"] == {"status": "ok"}
+
+    # Stop the daemon.
+    stop_proc = run_lsp_cmd("--socket", socket_path, "stop")
+    assert "stopped" in stop_proc.stdout.strip()

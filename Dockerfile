@@ -49,6 +49,3 @@ RUN lake serve &
 
 # Print the current user
 RUN whoami
-
-# Switch back to the default user from the base image.
-USER aider

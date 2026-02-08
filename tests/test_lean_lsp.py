@@ -7,6 +7,7 @@ import json
 import pytest
 
 SCRIPT_PATH = Path(__file__).parent.parent / "scripts" / "lean-lsp"
+DEFAULT_SOCKET_PATH = Path(".lean-lsp.sock")
 
 
 def run_lsp_cmd(*args, check=True, **kwargs):
@@ -24,7 +25,8 @@ def run_lsp_cmd(*args, check=True, **kwargs):
 
 def test_start_stop_check(tmp_path):
     """Test the daemon's start, stop, and check lifecycle."""
-    socket_path = tmp_path / "lean-lsp.sock"
+    # Use the default socket path
+    socket_path = DEFAULT_SOCKET_PATH
 
     # Start the daemon. --wait ensures it's ready.
     start_proc = run_lsp_cmd("--socket", socket_path, "start", "--wait", "10")
@@ -49,7 +51,8 @@ def test_start_stop_check(tmp_path):
 
 def test_ping(tmp_path):
     """Test the daemon's ping functionality."""
-    socket_path = tmp_path / "lean-lsp.sock"
+    # Use the default socket path
+    socket_path = DEFAULT_SOCKET_PATH
     # Start the daemon. --wait ensures it's ready.
     start_proc = run_lsp_cmd("--socket", socket_path, "start", "--wait", "10")
     assert "started" in start_proc.stdout.strip()

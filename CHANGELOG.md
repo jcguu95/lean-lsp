@@ -7,15 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-09
+
+This release concludes the v0.5 series, which saw the agent successfully author a proof (`sum_of_first_n_odd_numbers`) from scratch and a significant refactoring of the repository. The goal for v0.6.x is to enable the agent to query and reference specific statements in `mathlib` by their exact location, not just by name.
+
 ### Changed
+- Renamed `example-project` to `test-project` and moved it into `bin/` to better reflect its purpose.
+- Made the `all` command in `lean-lsp` more resilient by handling failures in individual LSP requests.
 - Moved `lean-lsp` and `test.sh` scripts into a `bin/` directory for better organization.
 - Updated `project-1/test.sh` to verify proofs by building and checking for `sorry`, instead of using LSP hover commands.
-- Refactored the main `test.sh` to be minimal and only test `example-project`.
+- Refactored the main `test.sh` to be minimal and only test `test-project`.
 
 ### Added
 - Created `project-1/test.sh` for a dedicated project-1 test suite.
 
 ### Fixed
+- Fixed paths in `bin/test.sh` to be more robust after script locations changed.
 - Scoped the `sorry` check in `project-1/test.sh` to only search project source files, not dependencies.
 - Corrected relative paths to `lean-lsp` in `project-1/test.sh`.
 - Restructured `project-1` to follow standard Lean library layout, fixing LSP analysis issues.

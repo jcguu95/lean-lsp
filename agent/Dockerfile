@@ -5,12 +5,11 @@ FROM paulgauthier/aider-full
 USER root
 
 # Install dependencies needed for elan (the Lean toolchain manager) and for building Lean projects.
-# git is needed by lake to fetch dependencies.
+# git is needed by lake to fetch dependencies and is present in the base image.
 # curl is needed to download elan.
 # libgmp-dev is needed for Lean's arbitrary-precision integers.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    git \
     libgmp-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Created `project-1` to begin proving a new theorem: the sum of the first n odd numbers is n².
+
 ## [0.5.0] - 2026-02-09
 
 This release establishes a stable, verifiable client-server architecture for interacting with the Lean LSP. The primary focus has been on creating a robust development and testing workflow that allows an agent within a Docker container to communicate with a Lean server running on the host machine.

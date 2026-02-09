@@ -18,7 +18,9 @@ docker build -t aider-lean -f Dockerfile .
 
 ## Running the Container
 
-To start an interactive session in a container, use the `docker run` command. This command mounts your current project directory into the container, sets up your git identity, and passes your AI model API key.
+To start an interactive session, navigate to the directory on your host machine that you want to work in (this will typically be the root of a Lean project) and run the following command. You do not need to be in the `agent` directory to run this.
+
+This command mounts your current project directory into the container, sets up your git identity, and passes your AI model API key.
 
 ```bash
 docker run -it --rm \
@@ -49,11 +51,13 @@ docker run -it --rm \
 
 ## Usage
 
-Once inside the container, `aider` will start and your current directory on the host is available at `/app`.
+Once inside the container, `aider` will start and your current working directory from the host will be available at `/app`.
+
+If you launched the container from a directory that already contains a Lean project, you're all set to start coding with Aider.
 
 ### Creating a new Lean project
 
-If you are starting a new project from scratch, you can initialize it with `lake` and add `mathlib` as a dependency. The following commands can be run from within the `aider` prompt.
+If you launched the container from an empty directory and want to start a new project from scratch, you can initialize it with `lake` and add `mathlib` as a dependency. The following commands can be run from within the `aider` prompt.
 
 1.  Initialize a new Lean project. This creates a new directory for your project.
     ```bash

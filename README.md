@@ -66,7 +66,7 @@ Before you can run `lake exe cache`, you must download the dependency and build 
 
 ## Testing the Setup
 
-The repository includes a "one-click" test script to verify that the entire client-server setup is working correctly.
+The repository includes a "one-click" test script to verify that the entire client-server setup is working correctly. This test runs on your host machine and does not require Docker.
 
 1.  **Make the script executable:**
     ```bash
@@ -79,11 +79,6 @@ The repository includes a "one-click" test script to verify that the entire clie
     ./test.sh
     ```
     The script will automatically set up the `example-project`, start the server, run a `hover` query, check the result, and shut down the server. If everything is configured correctly, you should see a "✅ Test PASSED" message.
-
-    **Note:** The test script is pre-configured with a default host path. If it fails, or if you are not running in the original user's environment, you may need to provide the absolute path to this repository on your host machine as an argument:
-    ```bash
-    ./test.sh /path/to/your/lean-lsp
-    ```
 
 ## Manual Usage
 

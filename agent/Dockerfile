@@ -30,7 +30,7 @@ RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -
 ENV PATH="/home/coder/.elan/bin:${PATH}"
 
 # Create a new lean project to use as a context for downloading mathlib.
-RUN lake new mathlib_project
+RUN /home/coder/.elan/bin/lake new mathlib_project
 
 # Enter the project directory
 WORKDIR /home/coder/mathlib_project
@@ -39,7 +39,7 @@ WORKDIR /home/coder/mathlib_project
 RUN echo "require mathlib from git \"https://github.com/leanprover-community/mathlib4.git\"" >> lakefile.toml
 
 # Download pre-compiled mathlib files. This is much faster than building from source.
-RUN lake exe cache get
+RUN /home/coder/.elan/bin/lake exe cache get
 
 # Clean up the dummy project
 WORKDIR /home/coder

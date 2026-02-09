@@ -48,10 +48,17 @@ The `lean-lsp` script acts as both a server and a client.
 
 ### On the host machine (macOS)
 
-1.  Create or navigate to a Lean project directory.
-2.  Start the server:
+1.  **Create a new Lean project (if you don't have one):**
+    Use `lake` to create a new project. This will create a new directory containing a `lakefile.lean` and other necessary files.
     ```bash
-    ./lean-lsp start --host 0.0.0.0
+    lake new my-lean-project
+    cd my-lean-project
+    ```
+
+2.  **Start the server from within the project directory:**
+    You will need to run the `lean-lsp` script from your project directory. You can use a relative or absolute path to the script. For example, if the `lean-lsp` repository is in the parent directory, you would run:
+    ```bash
+    ../lean-lsp/lean-lsp start --host 0.0.0.0
     ```
     This will start the Lean LSP server and listen for connections on all network interfaces on the default port.
 

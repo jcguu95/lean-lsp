@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added validation to ensure the `start` command is run from a Lean project directory.
 - Added more detailed instructions to `README.md` on how to create a Lean project and run the server from it.
 - Added installation instructions for setting up the LEAN toolchain on macOS to `README.md`.
 - Added a `--verbose` flag to the `start` command to show daemon logs for debugging.

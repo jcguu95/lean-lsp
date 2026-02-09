@@ -458,6 +458,17 @@ def run_daemon(config: DaemonConfig) -> int:
         return 0
 
     root_dir = config.root_dir.resolve()
+    if "lake" in config.server_cmd and not (
+        (root_dir / "lakefile.lean").exists()
+        or (root_dir / "lakefile.toml").exists()
+    ):
+        logger.error(
+            "error: no lakefile.lean or lakefile.toml found in %s. "
+            "Please run from a Lean project directory, or use the --root option.",
+            root_dir,
+        )
+        return 1
+
     server_cmd = shlex.split(config.server_cmd)
     try:
         proc = start_server(server_cmd, root_dir)

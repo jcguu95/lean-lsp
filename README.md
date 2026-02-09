@@ -1,27 +1,27 @@
-# LEAN Interaction Setup
+# lean-lsp
 
-This document outlines the plan for setting up the environment to interact with the LEAN theorem prover.
+A client/server wrapper for the Lean Language Server.
+
+The `lean-lsp` script acts as a client/server wrapper for the actual Lean Language Server Protocol (LSP) server (`lake serve`). It starts the LSP server as a daemon on the host and exposes a simple TCP socket interface. This allows a client on a different machine or in a container to send requests to the LSP server.
 
 ## Architecture
 
-The development environment consists of:
-1.  A Docker container where this software developer agent runs.
-2.  The host machine (macOS) where LEAN and mathlib are installed.
+The development and primary use case for this tool involves:
+1.  A Docker container where a client application (such as a software developer agent) runs.
+2.  The host machine (e.g., macOS) where LEAN and mathlib are installed.
 
-The `lean-lsp` script acts as a client/server wrapper for the actual Lean Language Server Protocol (LSP) server (`lake serve`). It starts the LSP server as a daemon on the host and exposes a simple TCP socket interface. The agent, running in the container, uses `lean-lsp` as a client to send requests to this TCP socket, which are then forwarded to the real LSP server.
+The client in the container uses `lean-lsp` to send requests to a TCP socket. The `lean-lsp` server process, running on the host, forwards these requests to the real LSP server.
 
 ## Rationale
 
-An initial attempt was made to install LEAN and mathlib directly within the Docker container. This approach was abandoned because the size of these dependencies exhausted the available disk space in the container.
-
-The current approach of running LEAN on the host machine and communicating over a socket avoids this storage issue while still allowing the agent to interact with the LEAN runtime.
+This approach was developed to avoid installing large dependencies like LEAN and mathlib directly within a Docker container, which can be problematic due to storage constraints. Running LEAN on the host and communicating over a socket provides a lightweight and flexible way for containerized tools to interact with the LEAN runtime.
 
 ## Installation
 
-On your macOS host machine, you need to install the Lean toolchain, which includes `lake`, the Lean build manager and language server. The recommended way to do this is using `elan`, the Lean toolchain manager.
+On your host machine, you need to install the Lean toolchain, which includes `lake`, the Lean build manager and language server. The recommended way to do this is using `elan`, the Lean toolchain manager.
 
 1.  **Install elan:**
-    You can install `elan` using Homebrew:
+    You can install `elan` using Homebrew on macOS:
     ```bash
     brew install elan-init
     ```
@@ -40,35 +40,34 @@ On your macOS host machine, you need to install the Lean toolchain, which includ
     ```
     This should print the version of Lake that was installed.
 
-Once `elan` and `lake` are installed, you can proceed to the usage section to start the server within a Lean project. `mathlib` is managed on a per-project basis and should be added as a dependency in your project's `lakefile.lean`.
+Once `elan` and `lake` are installed, you can proceed to the usage section to start the server within a Lean project.
 
-## Building Dependencies & Mathlib Cache
+## Building Project Dependencies
 
-When you add a dependency like `mathlib`, running `lake update` only downloads its source code into the `lake-packages` directory. It does not compile the library, which is a very time-consuming process.
-
-To avoid long build times, `mathlib` provides pre-compiled binary files (called a "cache"). The command to download this cache, `lake exe cache`, is provided by `mathlib` itself. Any standard Lean installation (e.g., via `elan-init`) that provides the `lake` command will suffice to use this feature.
-
-Before you can run `lake exe cache`, you must download the dependency and build the tool:
+When you use a Lean project with dependencies like `mathlib`, you need to download and build them.
 
 1.  **Update dependencies:**
-    This command downloads the source code for your dependencies (like `mathlib`).
+    This command downloads the source code for your dependencies (like `mathlib`). From inside your Lean project directory, run:
     ```bash
     lake update
     ```
     If you've just added a dependency and this command appears to do nothing, you may need to delete the `lake-manifest.json` file first to force `lake` to re-resolve dependencies.
 
-2.  **Download the cache:**
-    Once `mathlib`'s source is downloaded, you can fetch its pre-compiled cache files. This is done by running the `cache` executable provided by the `mathlib` package itself.
+2.  **Download the mathlib cache (recommended):**
+    To avoid long build times, `mathlib` provides pre-compiled binary files.
     ```bash
     lake exe mathlib/cache get
     ```
-    This will download and unpack the pre-compiled files for `mathlib`, making them available to the Lean server.
+
+3. **Build the project:**
+   This will compile your project and its dependencies.
+   ```bash
+   lake build
+   ```
 
 ## Quick Start: Verifying Your Setup
 
-Before proceeding, run the automated test script to ensure your environment is configured correctly. This is a critical first step.
-
-The script verifies the entire toolchain: it sets up the test project, starts the Lean LSP server, and runs tests from both the host and a Docker container to confirm communication.
+The repository includes a test script (`bin/test.sh`) to verify the entire toolchain. It sets up a test project, starts the Lean LSP server, and runs tests to confirm communication.
 
 1.  **Make the script executable:**
     ```bash
@@ -80,93 +79,55 @@ The script verifies the entire toolchain: it sets up the test project, starts th
     ```bash
     ./bin/test.sh
     ```
-    You should see "✅ Host Test PASSED" and "✅ Docker Test PASSED". If the test succeeds, you are ready to start working with the agent.
+    You should see "✅ Host Test PASSED" and "✅ Docker Test PASSED". If the test succeeds, your environment is configured correctly.
 
-    **Troubleshooting:**
-    - The script dynamically determines the project's absolute path using `pwd`, which is needed for the Docker test. If your setup requires a different path for Docker volume mounts, you can still provide it as an argument: `./bin/test.sh /path/to/your/lean-lsp`.
-    - The Docker test requires a Docker image named `lean-aider` which has this repository's code available at `/app`.
+## Usage
 
-## Agent Workflow
+The `./bin/lean-lsp` script can be run as a server (on the host machine) or as a client.
 
-Once your setup is verified, the workflow involves two main steps running in separate terminals:
+### Server Commands
+The server must be run from within a Lean project directory.
 
-### Step 1: Run the Lean LSP Server (on your host machine)
+- **Start the server daemon:**
+  ```bash
+  cd /path/to/lean/project
+  /path/to/lean-lsp/bin/lean-lsp start --host 0.0.0.0
+  ```
+- **Check server status:**
+  ```bash
+  /path/to/lean-lsp/bin/lean-lsp check --host <host>
+  ```
+- **Stop the server:**
+  ```bash
+  /path/to/lean-lsp/bin/lean-lsp stop --host <host>
+  ```
 
-The `lean-lsp` server must be running in the background for the agent to connect to. It needs to be run from within a Lean project directory.
+### Client Commands
+Client commands connect to the running server to send LSP requests. When the client and server are on different filesystems (e.g., Docker and host), you must provide path mappings.
 
-For the included example, navigate to the `bin/test-project` directory and start the server:
-```bash
-cd bin/test-project
-../../bin/lean-lsp start --host 0.0.0.0
-```
-The server will start and listen for connections. You can leave this terminal window open.
+- **Hover info:**
+  ```bash
+  ./bin/lean-lsp hover --host <host> --map-root-from <client_path> --map-root-to <host_path> <file> <line> <col>
+  ```
+- **Get plain goal:**
+  ```bash
+  ./bin/lean-lsp plain-goal --host <host> --map-root-from <client_path> --map-root-to <host_path> <file> <line> <col>
+  ```
+- **Get diagnostics:**
+  ```bash
+  ./bin/lean-lsp diagnostics --host <host> --map-root-from <client_path> --map-root-to <host_path> <file> <line> <col>
+  ```
+- **Get all of the above:**
+  ```bash
+  ./bin/lean-lsp all --host <host> --map-root-from <client_path> --map-root-to <host_path> <file> <line> <col>
+  ```
+- **Send a raw LSP request:**
+  ```bash
+  ./bin/lean-lsp request --host <host> --method <method> --params <json>
+  ```
 
-### Step 2: Run the Agent (in a Docker container)
-
-With the server running, you can now start an interactive session with the agent. In a new terminal, run the following command from the root of this repository.
-
-Make sure to replace `AIza...` with your actual Gemini API key.
-
-```bash
-docker_args=(
-    run -it                                   # Start in interactive mode with a TTY
-    --rm                                      # Automatically remove the container when it exits
-    --user "$(id -u):$(id -g)"                # Run as the current user to avoid file permission issues
-    --volume "$(pwd):/app"                    # Mount the current directory into the container
-    --env GIT_AUTHOR_NAME="$(git config user.name)"
-    --env GIT_AUTHOR_EMAIL="$(git config user.email)"
-    --env GIT_COMMITTER_NAME="$(git config user.name)"
-    --env GIT_COMMITTER_EMAIL="$(git config user.email)"
-    --env GEMINI_API_KEY="AIza..."
-
-    lean-aider
-    --model gemini/gemini-2.5-pro             # Specify the main model
-    --no-stream                               # Disable streaming output for cleaner responses
-    --weak-model gemini/gemini-2.0-flash-lite # Specify a weaker model for simpler tasks
-)
-docker "${docker_args[@]}"
-```
-The agent will now be able to use the `bin/lean-lsp` script to communicate with the Lean server running on your host.
-
-## Manual Usage
-
-If you want to run the server and client commands manually, follow these instructions.
-
-### On the host machine (macOS)
-
-1.  **Navigate to the test project and set up dependencies:**
-    From the root of this repository, run the following commands. This will download `mathlib` and its pre-compiled cache, then build the project.
-    ```bash
-    cd bin/test-project
-    rm -f lake-manifest.json
-    lake update
-    lake exe mathlib/cache get
-    lake build
-    ```
-
-2.  **Start the server:**
-    From the `bin/test-project` directory, start the server.
-    ```bash
-    ../../bin/lean-lsp start --host 0.0.0.0
-    ```
-    The server will start in the background and listen for connections.
-
-### In the Docker container (as the agent)
-
-To communicate with the server running on the host, you will need the host's IP address as seen from the container. Inside a Docker container, you can often use `host.docker.internal` to refer to the host machine.
-
-**IMPORTANT:** All client commands must be run from the root of the `lean-lsp` repository directory. This is because the script needs to find and read local files before sending requests to the server, and its working directory inside the container (`/app`) corresponds to your project root on the host.
-
-Run client commands by specifying the host and providing file paths relative to the project root. Because the client (in Docker) and server (on macOS) have different views of the filesystem, you must also provide path mappings.
-
-**Test the connection:**
-In a new terminal, from the root of the `lean-lsp` repository, run the `hover` command to query the test project. You must replace `/path/to/your/lean-lsp` with the absolute path to this repository on your machine.
-
-```bash
-# From the lean-lsp project root:
-./bin/lean-lsp hover --host host.docker.internal \
-  --map-root-from /app \
-  --map-root-to /path/to/your/lean-lsp \
-  bin/test-project/ExampleProject.lean 4 34
-```
-This should return the type signature and docstring for `Nat.Prime`, confirming the entire setup is working.
+### Notes
+- **This is not the LSP server itself.** It's a wrapper around `lake serve`.
+- The server (`start` command) must be running from within a Lean project directory.
+- The client commands are typically run from the repository root.
+- For a detailed example of using `lean-lsp` with a Docker-based AI agent, see [docs/AGENT_SETUP.md](./docs/AGENT_SETUP.md).

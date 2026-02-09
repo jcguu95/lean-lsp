@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Refactored documentation to be more general. The main `README.md` now describes the `lean-lsp` tool, and agent-specific setup instructions have been moved to `docs/AGENT_SETUP.md`.
+
 ## [0.6.0] - 2026-02-09
 
 This release concludes the v0.5 series, which saw the agent successfully author a proof (`sum_of_first_n_odd_numbers`) from scratch and a significant refactoring of the repository. The goal for v0.6.x is to enable the agent to query and reference specific statements in `mathlib` by their exact location, not just by name.

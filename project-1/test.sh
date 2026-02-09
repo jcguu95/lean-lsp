@@ -1,0 +1,92 @@
+#!/bin/bash
+set -euo pipefail
+
+# This script provides a "one-click" test for project-1.
+# It automates the process of setting up the project, starting the server,
+# running both a host and a Docker client query, and checking the results.
+
+# --- Configuration ---
+# The absolute path to this repository on your HOST machine (e.g., /Users/jin/lean-lsp).
+# This is required for the Docker test to correctly map file paths from the
+# container to the server on the host.
+#
+# You can provide this as the first argument to the script, or set it here directly.
+# NOTE: The default path below is pre-configured for a specific environment.
+# You may need to change it or pass the path as an argument.
+HOST_PROJECT_PATH=${1:-"/Users/jin/lean-lsp"}
+
+# Name of the Docker image to use for the test. This should be an image
+# that has this repository's code available at /app.
+DOCKER_IMAGE_NAME="lean-aider"
+
+# --- Script ---
+
+# Ensure we are running from the project-1 directory.
+cd "$(dirname "$0")"
+
+# --- Setup ---
+echo "--- Setting up project-1 ---"
+# Only run the full, slow setup if mathlib is not already downloaded.
+if [ ! -d ".lake/packages/mathlib" ]; then
+    echo "Mathlib not found, running full setup (this may take a few minutes)..."
+    rm -f lake-manifest.json
+    lake update
+    lake exe mathlib/cache get
+    lake build
+else
+    echo "Mathlib found, running a quick build..."
+    lake build
+fi
+echo "Setup complete."
+echo
+
+# --- Test Suite ---
+# Define a cleanup function to stop the server when the script exits.
+cleanup() {
+    echo
+    echo "--- Stopping any running server ---"
+    # Use || true to prevent the script from exiting with an error if the server is already stopped.
+    ../../lean-lsp stop --host 0.0.0.0 || true
+}
+trap cleanup EXIT
+
+# --- Run project-1 tests ---
+echo "--- Running tests for project-1 ---"
+../../lean-lsp start --host 0.0.0.0
+echo "Server started for project-1."
+
+# Host test
+echo "--- Running host test query for project-1 ---"
+OUTPUT=$(../../lean-lsp hover --host 127.0.0.1 Project1/SumOfOdd.lean 7 9)
+if [[ "$OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
+  echo "✅ Host Test PASSED for project-1"
+else
+  echo "❌ Host Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
+  exit 1
+fi
+
+# Docker test
+echo "--- Running Docker test query for project-1 ---"
+if ! docker info > /dev/null 2>&1; then
+    echo "⚠️  Docker is not running. Skipping Docker test."
+else
+    DOCKER_OUTPUT=$(docker run --rm \
+      --user "$(id -u):$(id -g)" \
+      --entrypoint /app/lean-lsp \
+      -v "$HOST_PROJECT_PATH":/app \
+      "$DOCKER_IMAGE_NAME" \
+      hover --host host.docker.internal \
+      --map-root-from /app \
+      --map-root-to "$HOST_PROJECT_PATH" \
+      project-1/Project1/SumOfOdd.lean 7 9)
+
+    if [[ "$DOCKER_OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
+      echo "✅ Docker Test PASSED for project-1"
+    else
+      echo "❌ Docker Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
+      exit 1
+    fi
+fi
+# Final server stop is handled by the cleanup trap
+echo
+echo "--- All tests for project-1 passed! ---"

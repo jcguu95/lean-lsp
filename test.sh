@@ -43,22 +43,6 @@ echo "--- 1. Setting up example project ---"
 echo "Setup complete."
 echo
 
-echo "--- 2. Setting up project-1 ---"
-(
-    cd project-1
-    if [ ! -d ".lake/packages/mathlib" ]; then
-        echo "Mathlib not found, running full setup (this may take a few minutes)..."
-        rm -f lake-manifest.json
-        lake update
-        lake exe mathlib/cache get
-        lake build
-    else
-        echo "Mathlib found, running a quick build..."
-        lake build
-    fi
-)
-echo "Setup complete."
-echo
 
 
 # --- Test Suite ---
@@ -111,44 +95,4 @@ fi
 ./lean-lsp stop --host 0.0.0.0
 echo "Server stopped for example-project."
 echo
-
-# --- Run project-1 tests ---
-echo "--- Running tests for project-1 ---"
-(cd project-1 && ../lean-lsp start --host 0.0.0.0)
-echo "Server started for project-1."
-
-# Host test
-echo "--- Running host test query for project-1 ---"
-OUTPUT=$(./lean-lsp hover --host 127.0.0.1 project-1/Project1/SumOfOdd.lean 7 9)
-if [[ "$OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
-  echo "✅ Host Test PASSED for project-1"
-else
-  echo "❌ Host Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
-  exit 1
-fi
-
-# Docker test
-echo "--- Running Docker test query for project-1 ---"
-if ! docker info > /dev/null 2>&1; then
-    echo "⚠️  Docker is not running. Skipping Docker test."
-else
-    DOCKER_OUTPUT=$(docker run --rm \
-      --user "$(id -u):$(id -g)" \
-      --entrypoint /app/lean-lsp \
-      -v "$HOST_PROJECT_PATH":/app \
-      "$DOCKER_IMAGE_NAME" \
-      hover --host host.docker.internal \
-      --map-root-from /app \
-      --map-root-to "$HOST_PROJECT_PATH" \
-      project-1/Project1/SumOfOdd.lean 7 9)
-
-    if [[ "$DOCKER_OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
-      echo "✅ Docker Test PASSED for project-1"
-    else
-      echo "❌ Docker Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
-      exit 1
-    fi
-fi
-# Final server stop is handled by the cleanup trap
-echo
-echo "--- All tests passed! ---"
+echo "--- All example-project tests passed! ---"

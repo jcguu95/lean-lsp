@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Refactored the main `test.sh` to be minimal and only test `example-project`.
+
+### Added
+- Created `project-1/test.sh` for a dedicated project-1 test suite.
+
 ### Fixed
 - Restructured `project-1` to follow standard Lean library layout, fixing LSP analysis issues.
 - Removed debug output from `test.sh`.

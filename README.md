@@ -48,15 +48,22 @@ When you add a dependency like `mathlib`, running `lake update` only downloads i
 
 To avoid long build times, `mathlib` provides pre-compiled binary files (called a "cache"). The command to download this cache, `lake exe cache`, is provided by `mathlib` itself. Any standard Lean installation (e.g., via `elan-init`) that provides the `lake` command will suffice to use this feature.
 
-Before you can run `lake exe cache`, you must build it:
+Before you can run `lake exe cache`, you must download the dependency and build the tool:
 
-1.  **Build the cache tool:**
+1.  **Update dependencies:**
+    This command downloads the source code for your dependencies (like `mathlib`).
+    ```bash
+    lake update
+    ```
+    If you've just added a dependency and this command appears to do nothing, you may need to delete the `lake-manifest.json` file first to force `lake` to re-resolve dependencies.
+
+2.  **Build the cache tool:**
     From within your Lean project directory (e.g., `test-project`), run the following command. This specifically builds the `cache` executable from the `mathlib` dependency.
     ```bash
     lake build mathlib:cache
     ```
 
-2.  **Download the cache:**
+3.  **Download the cache:**
     Now that the tool is built, you can download the pre-compiled cache:
     ```bash
     lake exe cache get
@@ -77,9 +84,11 @@ The `lean-lsp` script acts as both a server and a client.
     ```
 
 2.  **Add and build dependencies:**
-    Edit your `lakefile.toml` to add dependencies like `mathlib`. Then, from the project directory, build the `cache` tool and get the pre-compiled cache.
+    Edit your `lakefile.toml` to add dependencies like `mathlib`. Then, from the project directory, update your dependencies, build the `cache` tool, and get the pre-compiled cache.
     ```bash
-    # These commands only need to be run once, or when mathlib's version changes.
+    # After adding a dependency, run these commands.
+    # If `lake update` seems to do nothing, try removing `lake-manifest.json` first.
+    lake update
     lake build mathlib:cache
     lake exe cache get
     ```

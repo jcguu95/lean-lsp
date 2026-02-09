@@ -5,23 +5,10 @@ set -euo pipefail
 # It automates the process of setting up the example project, starting the server,
 # running a client query, and checking the result.
 
-# --- Configuration ---
-# The absolute path to this repository on your HOST machine (e.g., /Users/jin/lean-lsp).
-# This is required for the client (in Docker) to correctly map file paths to the
-# server (on the host).
-#
-# You can provide this as the first argument to the script, or set it here directly.
-# NOTE: The default path below is pre-configured for a specific environment.
-# You may need to change it or pass the path as an argument.
-HOST_PROJECT_PATH=${1:-"/Users/jin/lean-lsp"}
-
 # --- Script ---
 
 # Ensure we are running from the project root.
 cd "$(dirname "$0")"
-
-echo "Host project path set to: $HOST_PROJECT_PATH"
-echo
 
 # 1. Set up the example project
 echo "--- 1. Setting up example project ---"
@@ -61,10 +48,7 @@ echo
 
 # 4. Run the test query
 echo "--- 3. Running test query ---"
-OUTPUT=$(./lean-lsp hover --host host.docker.internal \
-  --map-root-from /app \
-  --map-root-to "$HOST_PROJECT_PATH" \
-  example-project/ExampleProject.lean 4 34)
+OUTPUT=$(./lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
 
 echo
 echo "--- 4. Checking result ---"

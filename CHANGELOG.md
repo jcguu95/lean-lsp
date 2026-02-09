@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-02-09
+
+### Added
+- Achieved stable client-server communication between the agent in a Docker container and the Lean LSP server on the host machine.
+
 ### Fixed
 - Corrected the `mathlib` import in the test project to point to a specific file (`Prime.Basic`) instead of a directory module.
 - Improved path-mapping logic to be more robust by using string operations instead of filesystem-dependent path resolution.

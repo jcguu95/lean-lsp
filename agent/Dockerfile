@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends debian-archive-
     && rm -rf /var/lib/apt/lists/*
 
 # Then, install the other packages.
+RUN apt-get update && apt-get install -y --no-install-recommends
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libgmp-dev \

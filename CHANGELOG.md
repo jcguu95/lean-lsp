@@ -8,13 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Updated `SKILL.md` to reflect the current TCP-based client/server architecture.
 - Clarified the role of the `lean-lsp` script as a wrapper for the Lean LSP server in `README.md` and the script's docstring.
+- Updated `test.sh` to set up and run tests against both `example-project` and `project-1`.
 
 ### Added
 - Created `project-1` and completed the proof for `sum_of_first_n_odd_numbers`.
-
-### Changed
-- Updated `test.sh` to set up and run tests against both `example-project` and `project-1`.
 
 ## [0.5.0] - 2026-02-09
 

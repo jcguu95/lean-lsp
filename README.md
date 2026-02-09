@@ -57,4 +57,3 @@ Client commands connect to the running server to send LSP requests. When the cli
 - The server (`start` command) must be running from within a Lean project directory.
 - The client commands are typically run from the repository root.
 - **Tip:** For instructions on how to install Lean and verify your setup, see the [Installation and Setup Guide](./docs/INSTALLATION.md).
-- **Tip:** The client/server model is particularly useful for containerized applications. For a detailed example of using `lean-lsp` with a Docker-based AI agent, see [docs/AGENT_SETUP.md](./docs/AGENT_SETUP.md).

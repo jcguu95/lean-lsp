@@ -73,4 +73,4 @@ The repository includes a test script (`bin/test.sh`) to verify the entire toolc
     ```bash
     ./bin/test.sh
     ```
-    You should see "✅ Host Test PASSED". If you have Docker installed, it will also run a container-based test and you should see "✅ Docker Test PASSED". A successful test means your environment is configured correctly.
+    You should see "✅ Host Test PASSED". A successful test means your environment is configured correctly.

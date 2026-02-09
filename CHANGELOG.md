@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-02-09
+
+### Removed
+- Decoupled the project from any specific agent workflow by removing `docs/AGENT_SETUP.md` and all Docker-related logic from `bin/test.sh`.
+
 ### Changed
 - Clarified that installation instructions in `docs/INSTALLATION.md` are for macOS.
 - Simplified `README.md` to focus on prerequisites and usage. Moved detailed setup, installation, and architecture information to `docs/INSTALLATION.md`.

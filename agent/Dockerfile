@@ -19,6 +19,11 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy the bin scripts into the image and make them executable.
+# This makes lean-lsp available for the agent.
+COPY bin /usr/local/bin/
+RUN chmod +x /usr/local/bin/lean-lsp
+
 USER appuser
 WORKDIR /home/appuser
 

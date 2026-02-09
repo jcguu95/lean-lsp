@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-09
+
 ### Added
 - Added validation to ensure the `start` command is run from a Lean project directory.
 - Added more detailed instructions to `README.md` on how to create a Lean project and run the server from it.

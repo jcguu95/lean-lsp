@@ -9,14 +9,11 @@ USER root
 # curl is needed to download elan.
 # libgmp-dev is needed for Lean's arbitrary-precision integers.
 
-# First, install the debian-archive-keyring package to fix GPG signature verification errors.
-# We temporarily allow unauthenticated packages to get the keyring updated.
-RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated debian-archive-keyring \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Then, install the other packages. Now, apt-get update should work without GPG errors.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install dependencies, fixing GPG errors by reinstalling the keyring first.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --allow-unauthenticated debian-archive-keyring && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
     curl \
     libgmp-dev \
     && apt-get clean \

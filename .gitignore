@@ -1,6 +1,4 @@
 .aider*
 
-# Ignore local test project
-test-project/*
-!test-project/lakefile.toml
-!test-project/TestProject.lean
+# Ignore build artifacts and dependencies in the example project
+/example-project/.lake/

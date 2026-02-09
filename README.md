@@ -17,16 +17,15 @@ The server must be run from within a Lean project directory.
 
 - **Start the server daemon:**
   ```bash
-  cd /path/to/lean/project
-  /path/to/lean-lsp/bin/lean-lsp start --host 0.0.0.0
+  ./bin/lean-lsp start --host 0.0.0.0
   ```
 - **Check server status:**
   ```bash
-  /path/to/lean-lsp/bin/lean-lsp check --host <host>
+  ./bin/lean-lsp check --host <host>
   ```
 - **Stop the server:**
   ```bash
-  /path/to/lean-lsp/bin/lean-lsp stop --host <host>
+  ./bin/lean-lsp stop --host <host>
   ```
 
 ### Client Commands

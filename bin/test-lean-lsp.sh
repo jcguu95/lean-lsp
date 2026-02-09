@@ -44,7 +44,7 @@ trap cleanup EXIT
 
 # --- Run test-project tests ---
 echo "--- Running tests for test-project ---"
-./bin/lean-lsp start --host 0.0.0.0 --root "$TEST_DIR/test-project" --verbose
+./bin/lean-lsp start --host 0.0.0.0 --root "$TEST_DIR/test-project"
 echo "Server started for test-project."
 
 # Host test

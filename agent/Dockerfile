@@ -10,12 +10,12 @@ USER root
 # libgmp-dev is needed for Lean's arbitrary-precision integers.
 
 # First, install the debian-archive-keyring package to fix GPG signature verification errors.
-RUN apt-get update && apt-get install -y --no-install-recommends debian-archive-keyring \
+# We temporarily allow unauthenticated packages to get the keyring updated.
+RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated debian-archive-keyring \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Then, install the other packages.
-RUN apt-get update && apt-get install -y --no-install-recommends
+# Then, install the other packages. Now, apt-get update should work without GPG errors.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libgmp-dev \

@@ -2,6 +2,9 @@ name = "test-project"
 version = "0.1.0"
 defaultTargets = ["test-project"]
 
+[require]
+mathlib = { git = "https://github.com/leanprover-community/mathlib4.git" }
+
 [[lean_lib]]
 name = "TestProject"
 

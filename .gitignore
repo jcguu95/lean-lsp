@@ -3,3 +3,4 @@
 # Ignore local test project
 test-project/*
 !test-project/lakefile.toml
+!test-project/TestProject.lean

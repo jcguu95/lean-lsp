@@ -22,7 +22,7 @@ RUN apt-get update && \
 # Copy scripts and test project from bin/ into the image.
 # The tools are placed in /opt/lean-tools and added to the PATH.
 COPY bin /opt/lean-tools
-RUN chmod +x /opt/lean-tools/lean-lsp /opt/lean-tools/test.sh
+RUN chmod +x /opt/lean-tools/lean-lsp /opt/lean-tools/test-lean-lsp.sh
 ENV PATH="/opt/lean-tools:${PATH}"
 
 USER appuser

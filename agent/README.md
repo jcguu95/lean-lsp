@@ -18,7 +18,7 @@ docker build -t aider-lean -f agent/Dockerfile .
 
 ## Testing the Environment
 
-The Docker image includes `lean-lsp`, a test script (`test.sh`), and a sample Lean project (`test-project`) to verify that the environment is set up correctly. You can run the built-in test script to ensure everything is working.
+The Docker image includes `lean-lsp`, a test script (`test-lean-lsp.sh`), and a sample Lean project (`test-project`) to verify that the environment is set up correctly. You can run the built-in test script to ensure everything is working.
 
 1.  Start a container with an interactive shell:
     ```bash
@@ -27,7 +27,7 @@ The Docker image includes `lean-lsp`, a test script (`test.sh`), and a sample Le
 
 2.  Inside the container, run the test script:
     ```bash
-    test.sh
+    test-lean-lsp.sh
     ```
     The script will start the `lean-lsp` daemon, run checks against the included `test-project`, and then stop the daemon. A successful run will exit with code 0.
 

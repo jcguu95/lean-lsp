@@ -11,16 +11,11 @@ set -euo pipefail
 # server (on the host).
 #
 # You can provide this as the first argument to the script, or set it here directly.
-HOST_PROJECT_PATH=${1:-"/path/to/your/lean-lsp"}
+# NOTE: The default path below is pre-configured for a specific environment.
+# You may need to change it or pass the path as an argument.
+HOST_PROJECT_PATH=${1:-"/Users/jin/lean-lsp"}
 
 # --- Script ---
-
-# Check if the placeholder path is still present.
-if [[ "$HOST_PROJECT_PATH" == "/path/to/your/lean-lsp" ]]; then
-  echo "❌ Error: Please configure HOST_PROJECT_PATH in test.sh or pass it as an argument."
-  echo "Usage: ./test.sh /absolute/path/to/lean-lsp"
-  exit 1
-fi
 
 # Ensure we are running from the project root.
 cd "$(dirname "$0")"

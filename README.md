@@ -68,16 +68,22 @@ Before you can run `lake exe cache`, you must download the dependency and build 
 
 The repository includes a "one-click" test script to verify that the entire client-server setup is working correctly.
 
-1.  **Configure the test script:**
-    Open the `test.sh` file and replace the placeholder `/path/to/your/lean-lsp` with the absolute path to this repository on your host machine. Alternatively, you can pass the path as the first argument to the script.
-
-2.  **Run the test:**
-    Make the script executable and run it from the root of the repository.
+1.  **Make the script executable:**
     ```bash
     chmod +x test.sh
-    ./test.sh /path/to/your/lean-lsp
+    ```
+
+2.  **Run the test:**
+    Run the script from the root of the repository.
+    ```bash
+    ./test.sh
     ```
     The script will automatically set up the `example-project`, start the server, run a `hover` query, check the result, and shut down the server. If everything is configured correctly, you should see a "✅ Test PASSED" message.
+
+    **Note:** The test script is pre-configured with a default host path. If it fails, or if you are not running in the original user's environment, you may need to provide the absolute path to this repository on your host machine as an argument:
+    ```bash
+    ./test.sh /path/to/your/lean-lsp
+    ```
 
 ## Manual Usage
 

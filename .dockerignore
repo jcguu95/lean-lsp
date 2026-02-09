@@ -2,4 +2,4 @@
 .git
 
 # Ignore lean build artifacts
-.lake/
+**/.lake/

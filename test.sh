@@ -119,11 +119,7 @@ echo "Server started for project-1."
 
 # Host test
 echo "--- Running host test query for project-1 ---"
-OUTPUT=$(./lean-lsp hover --host 127.0.0.1 project-1/SumOfOdd.lean 7 9)
-echo "Received output for project-1 host test:"
-echo "---------------------------"
-echo "$OUTPUT"
-echo "---------------------------"
+OUTPUT=$(./lean-lsp hover --host 127.0.0.1 project-1/Project1/SumOfOdd.lean 7 9)
 if [[ "$OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
   echo "✅ Host Test PASSED for project-1"
 else
@@ -144,12 +140,8 @@ else
       hover --host host.docker.internal \
       --map-root-from /app \
       --map-root-to "$HOST_PROJECT_PATH" \
-      project-1/SumOfOdd.lean 7 9)
+      project-1/Project1/SumOfOdd.lean 7 9)
 
-    echo "Received output for project-1 Docker test:"
-    echo "---------------------------"
-    echo "$DOCKER_OUTPUT"
-    echo "---------------------------"
     if [[ "$DOCKER_OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
       echo "✅ Docker Test PASSED for project-1"
     else

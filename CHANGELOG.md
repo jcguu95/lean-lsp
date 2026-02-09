@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Restructured `project-1` to follow standard Lean library layout, fixing LSP analysis issues.
+- Removed debug output from `test.sh`.
+
 ## [0.5.1] - 2026-02-09
 
 ### Fixed

@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clarified the role of the `lean-lsp` script as a wrapper for the Lean LSP server in `README.md` and the script's docstring.
 
 ### Added
-- Created `project-1` to begin proving a new theorem: the sum of the first n odd numbers is n².
+- Created `project-1` and completed the proof for `sum_of_first_n_odd_numbers`.
 
 ## [0.5.0] - 2026-02-09
 

@@ -6,4 +6,8 @@ open BigOperators -- to use ∑ notation
 
 theorem sum_of_first_n_odd_numbers (n : ℕ) :
   ∑ i in Finset.range n, (2 * i + 1) = n * n := by
-  sorry -- to be proven
+  induction n with
+  | zero => simp
+  | succ k ih =>
+    rw [Finset.sum_range_succ, ih]
+    ring

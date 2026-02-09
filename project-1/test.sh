@@ -46,18 +46,18 @@ cleanup() {
     echo
     echo "--- Stopping any running server ---"
     # Use || true to prevent the script from exiting with an error if the server is already stopped.
-    ../../lean-lsp stop --host 0.0.0.0 || true
+    ../lean-lsp stop --host 0.0.0.0 || true
 }
 trap cleanup EXIT
 
 # --- Run project-1 tests ---
 echo "--- Running tests for project-1 ---"
-../../lean-lsp start --host 0.0.0.0
+../lean-lsp start --host 0.0.0.0
 echo "Server started for project-1."
 
 # Host test
 echo "--- Running host test query for project-1 ---"
-OUTPUT=$(../../lean-lsp hover --host 127.0.0.1 Project1/SumOfOdd.lean 7 9)
+OUTPUT=$(../lean-lsp hover --host 127.0.0.1 Project1/SumOfOdd.lean 7 9)
 if [[ "$OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
   echo "✅ Host Test PASSED for project-1"
 else

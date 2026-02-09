@@ -897,22 +897,27 @@ def add_daemon_args(parser: argparse.ArgumentParser) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Lean LSP daemon and client.")
-    parser.add_argument(
+    parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
+    parser.add_argument("--version", action="version", version=f"lean-lsp {VERSION}")
+
+    conn_parser = argparse.ArgumentParser(add_help=False)
+    conn_parser.add_argument(
         "--host",
         default=None,
         help="Host for TCP socket (default: $LEAN_LSP_HOST, or 127.0.0.1 for server)",
     )
-    parser.add_argument(
+    conn_parser.add_argument(
         "--port",
         type=int,
         default=None,
         help=f"Port for TCP socket (default: $LEAN_LSP_PORT or {DEFAULT_PORT})",
     )
-    parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
-    parser.add_argument("--version", action="version", version=f"lean-lsp {VERSION}")
+
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    start_parser = subparsers.add_parser("start", help="Start the daemon")
+    start_parser = subparsers.add_parser(
+        "start", help="Start the daemon", parents=[conn_parser]
+    )
     add_daemon_args(start_parser)
     start_parser.add_argument(
         "--wait",
@@ -926,10 +931,16 @@ def parse_args() -> argparse.Namespace:
         help="Run the daemon in the foreground",
     )
 
-    subparsers.add_parser("check", help="Check whether the daemon is reachable")
-    subparsers.add_parser("stop", help="Ask the daemon to shut down")
+    subparsers.add_parser(
+        "check", help="Check whether the daemon is reachable", parents=[conn_parser]
+    )
+    subparsers.add_parser(
+        "stop", help="Ask the daemon to shut down", parents=[conn_parser]
+    )
 
-    request_parser = subparsers.add_parser("request", help="Send a raw LSP request")
+    request_parser = subparsers.add_parser(
+        "request", help="Send a raw LSP request", parents=[conn_parser]
+    )
     request_parser.add_argument("--method", required=True, help="LSP method name")
     request_parser.add_argument(
         "--params", default="{}", help="JSON params, @file, or - for stdin"
@@ -958,7 +969,9 @@ def parse_args() -> argparse.Namespace:
         help="Wait for diagnostics before the request",
     )
 
-    notify_parser = subparsers.add_parser("notify", help="Send an LSP notification")
+    notify_parser = subparsers.add_parser(
+        "notify", help="Send an LSP notification", parents=[conn_parser]
+    )
     notify_parser.add_argument("--method", required=True, help="LSP method name")
     notify_parser.add_argument(
         "--params", default=None, help="JSON params, @file, or - for stdin"
@@ -967,7 +980,9 @@ def parse_args() -> argparse.Namespace:
         "--timeout", type=int, default=10, help="Socket timeout in seconds"
     )
 
-    batch_parser = subparsers.add_parser("batch", help="Send a batch of daemon ops")
+    batch_parser = subparsers.add_parser(
+        "batch", help="Send a batch of daemon ops", parents=[conn_parser]
+    )
     batch_parser.add_argument(
         "--ops", required=True, help="JSON list of ops, @file, or - for stdin"
     )
@@ -995,15 +1010,29 @@ def parse_args() -> argparse.Namespace:
             help="Skip waitForDiagnostics before request",
         )
 
-    add_position_args(subparsers.add_parser("plain-goal", help="Lean plain goal"))
     add_position_args(
-        subparsers.add_parser("plain-term-goal", help="Lean plain term goal")
+        subparsers.add_parser("plain-goal", help="Lean plain goal", parents=[conn_parser])
     )
-    add_position_args(subparsers.add_parser("hover", help="Lean hover"))
-    add_position_args(subparsers.add_parser("diagnostics", help="Lean diagnostics"))
-    add_position_args(subparsers.add_parser("all", help="Lean goals + diagnostics"))
+    add_position_args(
+        subparsers.add_parser(
+            "plain-term-goal", help="Lean plain term goal", parents=[conn_parser]
+        )
+    )
+    add_position_args(
+        subparsers.add_parser("hover", help="Lean hover", parents=[conn_parser])
+    )
+    add_position_args(
+        subparsers.add_parser("diagnostics", help="Lean diagnostics", parents=[conn_parser])
+    )
+    add_position_args(
+        subparsers.add_parser(
+            "all", help="Lean goals + diagnostics", parents=[conn_parser]
+        )
+    )
 
-    daemon_parser = subparsers.add_parser("daemon", help=argparse.SUPPRESS)
+    daemon_parser = subparsers.add_parser(
+        "daemon", help=argparse.SUPPRESS, parents=[conn_parser]
+    )
     add_daemon_args(daemon_parser)
 
     return parser.parse_args()

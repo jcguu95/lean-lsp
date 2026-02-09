@@ -6,11 +6,11 @@ The `lean-lsp` script acts as a client/server wrapper for the actual Lean Langua
 
 ## Architecture
 
-The development and primary use case for this tool involves:
-1.  A Docker container where a client application (such as a software developer agent) runs.
-2.  The host machine (e.g., macOS) where LEAN and mathlib are installed.
+`lean-lsp` operates on a client-server model:
+1.  **The Server:** Runs on a machine with a full Lean installation. It is started from within a Lean project and acts as a bridge to the real Lean LSP server (`lake serve`).
+2.  **The Client:** Can be any application that needs to interact with the Lean LSP. It communicates with the `lean-lsp` server over a simple TCP socket, which makes it ideal for remote or containerized environments.
 
-The client in the container uses `lean-lsp` to send requests to a TCP socket. The `lean-lsp` server process, running on the host, forwards these requests to the real LSP server.
+This setup decouples the client from the Lean environment, allowing lightweight clients to query a full Lean installation from anywhere on the network.
 
 ## Installation
 
@@ -75,7 +75,7 @@ The repository includes a test script (`bin/test.sh`) to verify the entire toolc
     ```bash
     ./bin/test.sh
     ```
-    You should see "✅ Host Test PASSED" and "✅ Docker Test PASSED". If the test succeeds, your environment is configured correctly.
+    You should see "✅ Host Test PASSED". If you have Docker installed, it will also run a container-based test and you should see "✅ Docker Test PASSED". A successful test means your environment is configured correctly.
 
 ## Usage
 
@@ -122,8 +122,8 @@ Client commands connect to the running server to send LSP requests. When the cli
   ./bin/lean-lsp request --host <host> --method <method> --params <json>
   ```
 
-### Notes
+### Notes & Tips
 - **This is not the LSP server itself.** It's a wrapper around `lake serve`.
 - The server (`start` command) must be running from within a Lean project directory.
 - The client commands are typically run from the repository root.
-- For a detailed example of using `lean-lsp` with a Docker-based AI agent, see [docs/AGENT_SETUP.md](./docs/AGENT_SETUP.md).
+- **Tip:** The client/server model is particularly useful for containerized applications. For a detailed example of using `lean-lsp` with a Docker-based AI agent, see [docs/AGENT_SETUP.md](./docs/AGENT_SETUP.md).

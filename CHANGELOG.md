@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Further generalized `README.md` to focus on `lean-lsp`'s client-server architecture, removing specific references to the Docker/agent use-case.
 - Refactored documentation to be more general. The main `README.md` now describes the `lean-lsp` tool, and agent-specific setup instructions have been moved to `docs/AGENT_SETUP.md`.
 
 ## [0.6.0] - 2026-02-09

@@ -17,8 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated test project to import and check a `mathlib` definition.
 
 ### Fixed
-- Simplified `test-project/lakefile.toml` and corrected `mathlib` cache build instructions to resolve persistent dependency issues.
-- Corrected the dependency syntax in `test-project/lakefile.toml`.
+- Updated `README.md` and `test-project/lakefile.toml` with correct dependency syntax (`[[require]]`) and `mathlib` cache command (`lake exe mathlib/cache get`) based on troubleshooting with Lake v5.0.0.
 
 ## [0.2.0] - 2026-02-09
 

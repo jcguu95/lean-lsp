@@ -57,16 +57,10 @@ Before you can run `lake exe cache`, you must download the dependency and build 
     ```
     If you've just added a dependency and this command appears to do nothing, you may need to delete the `lake-manifest.json` file first to force `lake` to re-resolve dependencies.
 
-2.  **Build the cache tool:**
-    From within your Lean project directory (e.g., `test-project`), run the following command. This specifically builds the `cache` executable from the `mathlib` dependency.
+2.  **Download the cache:**
+    Once `mathlib`'s source is downloaded, you can fetch its pre-compiled cache files. This is done by running the `cache` executable provided by the `mathlib` package itself.
     ```bash
-    lake build Cache
-    ```
-
-3.  **Download the cache:**
-    Now that the tool is built, you can download the pre-compiled cache:
-    ```bash
-    lake exe cache get
+    lake exe mathlib/cache get
     ```
     This will download and unpack the pre-compiled files for `mathlib`, making them available to the Lean server.
 
@@ -89,8 +83,7 @@ The `lean-lsp` script acts as both a server and a client.
     # After adding a dependency, run these commands.
     # If `lake update` seems to do nothing, try removing `lake-manifest.json` first.
     lake update
-    lake build Cache
-    lake exe cache get
+    lake exe mathlib/cache get
     ```
 
 3.  **Start the server from within the project directory:**

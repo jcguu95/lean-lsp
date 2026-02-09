@@ -90,9 +90,10 @@ fi
 
 DOCKER_OUTPUT=$(docker run --rm \
   --user "$(id -u):$(id -g)" \
+  --entrypoint /app/lean-lsp \
   -v "$HOST_PROJECT_PATH":/app \
   "$DOCKER_IMAGE_NAME" \
-  /app/lean-lsp hover --host host.docker.internal \
+  hover --host host.docker.internal \
   --map-root-from /app \
   --map-root-to "$HOST_PROJECT_PATH" \
   example-project/ExampleProject.lean 4 34)

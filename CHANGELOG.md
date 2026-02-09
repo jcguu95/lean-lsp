@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Aligned `test.sh` Docker command with the user's specific `lean-aider` environment.
+
+### Fixed
+- Fixed Docker test by overriding the container's entrypoint to correctly execute `lean-lsp`.
 - Updated `test.sh` to run a host-only test by default, removing the need for Docker-specific hostnames and path configurations.
 - Renamed `test-project` to `example-project` and included it in the repository to serve as a ready-to-use test case.
 

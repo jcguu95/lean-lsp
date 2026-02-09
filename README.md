@@ -83,7 +83,7 @@ The script verifies the entire toolchain: it sets up the test project, starts th
     You should see "✅ Host Test PASSED" and "✅ Docker Test PASSED". If the test succeeds, you are ready to start working with the agent.
 
     **Troubleshooting:**
-    - The script is pre-configured with a default host path (`/Users/jin/lean-lsp`). If the Docker test fails, you may need to provide the absolute path to this repository on your machine: `./bin/test.sh /path/to/your/lean-lsp`.
+    - The script dynamically determines the project's absolute path using `pwd`, which is needed for the Docker test. If your setup requires a different path for Docker volume mounts, you can still provide it as an argument: `./bin/test.sh /path/to/your/lean-lsp`.
     - The Docker test requires a Docker image named `lean-aider` which has this repository's code available at `/app`.
 
 ## Agent Workflow

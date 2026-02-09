@@ -8,25 +8,8 @@ USER root
 # git is needed by lake to fetch dependencies and is present in the base image.
 # curl is needed to download elan.
 # libgmp-dev is needed for Lean's arbitrary-precision integers.
-
-#RUN sed -i 's/http:/https:/g' /etc/apt/sources.list.d/debian.sources || \
-#    sed -i 's/http:/https:/g' /etc/apt/sources.list
-#
-#RUN apt-get update -o Acquire::AllowInsecureRepositories=true || true && \
-#    apt-get install -y --allow-unauthenticated debian-archive-keyring && \
-#    rm -rf /var/lib/apt/lists/* && \
-#    apt-get update && \
-#    apt-get install -y --no-install-recommends curl libgmp-dev
-#
-#RUN rm -rf /var/lib/apt/lists/* && \
-#    apt-get update -o Acquire::AllowInsecureRepositories=true || apt-get update
-#
-#RUN apt-get update || true && \
-#    apt-get install -y debian-archive-keyring && \
-#    apt-get update && \
-#    apt-get install -y --no-install-recommends curl libgmp-dev
-
 # Install dependencies, fixing GPG errors by reinstalling the keyring first.
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --allow-unauthenticated debian-archive-keyring && \
     apt-get update && \
@@ -36,18 +19,11 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Switch back to the non-root user provided by the base image
-USER coder
-WORKDIR /home/coder
-
-# Set user and home directory environment variables to ensure user context is available.
-ENV USER=coder
-ENV HOME=/home/coder
-
 # Install elan, which manages installations of Lean and Lake.
 # This installs lean and lake into /home/coder/.elan
 # The -y flag runs it non-interactively.
 # We set the default toolchain to stable.
+USER appuser
 RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain stable
 
 # Add elan's bin directory to the PATH

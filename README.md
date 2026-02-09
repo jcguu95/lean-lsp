@@ -68,7 +68,7 @@ Before you can run `lake exe cache`, you must download the dependency and build 
 
 Before proceeding, run the automated test script to ensure your environment is configured correctly. This is a critical first step.
 
-The script verifies the entire toolchain: it sets up the example project, starts the Lean LSP server, and runs tests from both the host and a Docker container to confirm communication.
+The script verifies the entire toolchain: it sets up the test project, starts the Lean LSP server, and runs tests from both the host and a Docker container to confirm communication.
 
 1.  **Make the script executable:**
     ```bash
@@ -94,10 +94,10 @@ Once your setup is verified, the workflow involves two main steps running in sep
 
 The `lean-lsp` server must be running in the background for the agent to connect to. It needs to be run from within a Lean project directory.
 
-For the included example, navigate to the `example-project` directory and start the server:
+For the included example, navigate to the `bin/test-project` directory and start the server:
 ```bash
-cd example-project
-../bin/lean-lsp start --host 0.0.0.0
+cd bin/test-project
+../../bin/lean-lsp start --host 0.0.0.0
 ```
 The server will start and listen for connections. You can leave this terminal window open.
 
@@ -134,10 +134,10 @@ If you want to run the server and client commands manually, follow these instruc
 
 ### On the host machine (macOS)
 
-1.  **Navigate to the example project and set up dependencies:**
+1.  **Navigate to the test project and set up dependencies:**
     From the root of this repository, run the following commands. This will download `mathlib` and its pre-compiled cache, then build the project.
     ```bash
-    cd example-project
+    cd bin/test-project
     rm -f lake-manifest.json
     lake update
     lake exe mathlib/cache get
@@ -145,9 +145,9 @@ If you want to run the server and client commands manually, follow these instruc
     ```
 
 2.  **Start the server:**
-    From the `example-project` directory, start the server.
+    From the `bin/test-project` directory, start the server.
     ```bash
-    ../bin/lean-lsp start --host 0.0.0.0
+    ../../bin/lean-lsp start --host 0.0.0.0
     ```
     The server will start in the background and listen for connections.
 
@@ -160,13 +160,13 @@ To communicate with the server running on the host, you will need the host's IP 
 Run client commands by specifying the host and providing file paths relative to the project root. Because the client (in Docker) and server (on macOS) have different views of the filesystem, you must also provide path mappings.
 
 **Test the connection:**
-In a new terminal, from the root of the `lean-lsp` repository, run the `hover` command to query the example project. You must replace `/path/to/your/lean-lsp` with the absolute path to this repository on your machine.
+In a new terminal, from the root of the `lean-lsp` repository, run the `hover` command to query the test project. You must replace `/path/to/your/lean-lsp` with the absolute path to this repository on your machine.
 
 ```bash
 # From the lean-lsp project root:
 ./bin/lean-lsp hover --host host.docker.internal \
   --map-root-from /app \
   --map-root-to /path/to/your/lean-lsp \
-  example-project/ExampleProject.lean 4 34
+  bin/test-project/ExampleProject.lean 4 34
 ```
 This should return the type signature and docstring for `Nat.Prime`, confirming the entire setup is working.

@@ -1,7 +1,7 @@
 .aider*
 
-# Ignore build artifacts and dependencies in the example project
-/example-project/.lake/
+# Ignore build artifacts and dependencies in the test project
+/bin/test-project/.lake/
 
 # Ignore build artifacts and dependencies in project-1
 /project-1/.lake/

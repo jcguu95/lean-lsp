@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # This script provides a "one-click" test to verify the entire client-server setup.
-# It automates the process of setting up the example project, starting the server,
+# It automates the process of setting up the test project, starting the server,
 # running both a host and a Docker client query, and checking the results.
 
 # --- Configuration ---
@@ -21,9 +21,9 @@ DOCKER_IMAGE_NAME="lean-aider"
 # --- Script ---
 
 # --- Setup ---
-echo "--- 1. Setting up example project ---"
+echo "--- 1. Setting up test project ---"
 (
-    cd example-project
+    cd bin/test-project
     # Only run the full, slow setup if mathlib is not already downloaded.
     if [ ! -d ".lake/packages/mathlib" ]; then
         echo "Mathlib not found, running full setup (this may take a few minutes)..."
@@ -51,23 +51,23 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# --- Run example-project tests ---
-echo "--- Running tests for example-project ---"
-(cd example-project && ../bin/lean-lsp start --host 0.0.0.0)
-echo "Server started for example-project."
+# --- Run test-project tests ---
+echo "--- Running tests for test-project ---"
+(cd bin/test-project && ../../bin/lean-lsp start --host 0.0.0.0)
+echo "Server started for test-project."
 
 # Host test
-echo "--- Running host test query for example-project ---"
-OUTPUT=$(./bin/lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
+echo "--- Running host test query for test-project ---"
+OUTPUT=$(./bin/lean-lsp hover --host 127.0.0.1 bin/test-project/ExampleProject.lean 4 34)
 if [[ "$OUTPUT" == *"Nat.Prime"* ]]; then
-  echo "✅ Host Test PASSED for example-project"
+  echo "✅ Host Test PASSED for test-project"
 else
-  echo "❌ Host Test FAILED for example-project: Output did not contain 'Nat.Prime'"
+  echo "❌ Host Test FAILED for test-project: Output did not contain 'Nat.Prime'"
   exit 1
 fi
 
 # Docker test
-echo "--- Running Docker test query for example-project ---"
+echo "--- Running Docker test query for test-project ---"
 if ! docker info > /dev/null 2>&1; then
     echo "⚠️  Docker is not running. Skipping Docker test."
 else
@@ -79,16 +79,16 @@ else
       hover --host host.docker.internal \
       --map-root-from /app \
       --map-root-to "$HOST_PROJECT_PATH" \
-      example-project/ExampleProject.lean 4 34)
+      bin/test-project/ExampleProject.lean 4 34)
 
     if [[ "$DOCKER_OUTPUT" == *"Nat.Prime"* ]]; then
-      echo "✅ Docker Test PASSED for example-project"
+      echo "✅ Docker Test PASSED for test-project"
     else
-      echo "❌ Docker Test FAILED for example-project: Output did not contain 'Nat.Prime'"
+      echo "❌ Docker Test FAILED for test-project: Output did not contain 'Nat.Prime'"
       exit 1
     fi
 fi
 ./bin/lean-lsp stop --host 0.0.0.0
-echo "Server stopped for example-project."
+echo "Server stopped for test-project."
 echo
-echo "--- All example-project tests passed! ---"
+echo "--- All test-project tests passed! ---"

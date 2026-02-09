@@ -19,12 +19,6 @@ RUN apt-get update && \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy scripts and test project from bin/ into the image.
-# The tools are placed in /opt/lean-tools and added to the PATH.
-COPY bin /opt/lean-tools
-RUN chmod +x /opt/lean-tools/lean-lsp /opt/lean-tools/test-lean-lsp.sh
-ENV PATH="/opt/lean-tools:${PATH}"
-
 USER appuser
 WORKDIR /home/appuser
 
@@ -54,6 +48,14 @@ RUN lake build # Pre-compile the 'global_lib' to ensure everything is indexed
 # Clean up temp project, but the binaries stay in $MATHLIB_CACHE_DIR
 WORKDIR /home/appuser
 RUN rm -rf /tmp/mathlib_init
+
+USER root
+# Copy scripts and test project from bin/ into the image.
+# The tools are placed in /opt/lean-tools and added to the PATH.
+COPY bin /opt/lean-tools
+RUN chmod +x /opt/lean-tools/lean-lsp /opt/lean-tools/test-lean-lsp.sh
+ENV PATH="/opt/lean-tools:${PATH}"
+USER appuser
 
 # Set final working directory
 WORKDIR /app

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added a Docker-based test to `test.sh` to simulate and verify the agent's environment.
 - Added `test.sh` for a "one-click" verification of the client-server setup.
 
 ### Changed

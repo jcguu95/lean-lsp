@@ -1,3 +1,6 @@
+[WARNING: This document is still a draft. The proposed method does not work yet, as
+a linux-based docker container cannot run macOS's binary directy.]
+
 # Aider with Lean Integration
 
 This guide explains how to set up and run a Dockerized Aider environment that can interact with the Lean theorem prover.

@@ -1,5 +1,5 @@
 .aider*
 
 # Ignore local test project
-test-project/
+test-project/*
 !test-project/lakefile.toml

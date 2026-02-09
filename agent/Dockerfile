@@ -40,6 +40,10 @@ RUN apt-get update && \
 USER coder
 WORKDIR /home/coder
 
+# Set user and home directory environment variables to ensure user context is available.
+ENV USER=coder
+ENV HOME=/home/coder
+
 # Install elan, which manages installations of Lean and Lake.
 # This installs lean and lake into /home/coder/.elan
 # The -y flag runs it non-interactively.

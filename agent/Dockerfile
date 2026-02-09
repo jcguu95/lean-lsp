@@ -8,9 +8,11 @@ USER root
 # git is needed by lake to fetch dependencies and is present in the base image.
 # curl is needed to download elan.
 # libgmp-dev is needed for Lean's arbitrary-precision integers.
+# debian-archive-keyring is needed to fix GPG signature verification errors.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libgmp-dev \
+    debian-archive-keyring \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

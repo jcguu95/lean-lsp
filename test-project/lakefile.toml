@@ -1,13 +1,7 @@
 name = "test-project"
 version = "0.1.0"
-defaultTargets = ["test-project"]
-
 [dependencies]
 mathlib = { git = "https://github.com/leanprover-community/mathlib4.git" }
 
 [[lean_lib]]
 name = "TestProject"
-
-[[lean_exe]]
-name = "test-project"
-root = "Main"

@@ -60,7 +60,7 @@ Before you can run `lake exe cache`, you must download the dependency and build 
 2.  **Build the cache tool:**
     From within your Lean project directory (e.g., `test-project`), run the following command. This specifically builds the `cache` executable from the `mathlib` dependency.
     ```bash
-    lake build mathlib:cache
+    lake build Cache
     ```
 
 3.  **Download the cache:**
@@ -77,9 +77,9 @@ The `lean-lsp` script acts as both a server and a client.
 ### On the host machine (macOS)
 
 1.  **Create a new Lean project (if you don't have one):**
-    Use `lake` to create a new project. This will create a new directory containing a `lakefile.lean` and other necessary files.
+    Use `lake` to create a new library project. This is the simplest starting point.
     ```bash
-    lake new my-lean-project
+    lake new my-lean-project lib
     cd my-lean-project
     ```
 
@@ -89,7 +89,7 @@ The `lean-lsp` script acts as both a server and a client.
     # After adding a dependency, run these commands.
     # If `lake update` seems to do nothing, try removing `lake-manifest.json` first.
     lake update
-    lake build mathlib:cache
+    lake build Cache
     lake exe cache get
     ```
 

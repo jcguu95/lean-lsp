@@ -1,6 +1,6 @@
--- This module serves as the root of the `TestProject` library.
--- Import modules here that should be built as part of the library.
-import TestProject.Basic
 import Mathlib.Data.Nat.Prime
 
-#check Nat.Prime
+def an_example_prime : Nat := 17
+
+-- Check that 17 is prime. The server should be able to provide info on `Nat.Prime`.
+#check Nat.Prime an_example_prime

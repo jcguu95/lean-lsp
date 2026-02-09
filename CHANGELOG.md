@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added path mapping flags (`--map-root-from`, `--map-root-to`) to support client/server running on different filesystems (e.g. Docker container and host).
 
 ### Changed
+- Updated `README.md` to include instructions for installing and using the `mathlib` cache.
 - Updated `README.md` to clarify that client commands must be run from the project root.
 - Added `mathlib` as a dependency to the test project.
 - Updated test project to import and check a `mathlib` definition.

@@ -42,6 +42,25 @@ On your macOS host machine, you need to install the Lean toolchain, which includ
 
 Once `elan` and `lake` are installed, you can proceed to the usage section to start the server within a Lean project. `mathlib` is managed on a per-project basis and should be added as a dependency in your project's `lakefile.lean`.
 
+## Building Dependencies & Mathlib Cache
+
+When you add a dependency like `mathlib`, running `lake update` only downloads its source code (into the `lake-packages` directory). It does not compile the library, which is a very time-consuming process for a large library like `mathlib`.
+
+To avoid long build times, `mathlib` provides pre-compiled binary files (called a "cache"). You can download this cache to get `mathlib` ready for use almost instantly.
+
+1.  **Install `lake-cli`:**
+    This tool provides the `lake exe cache` command.
+    ```bash
+    pip install lake-cli
+    ```
+
+2.  **Download the cache:**
+    From within your Lean project directory (e.g., `test-project`), run:
+    ```bash
+    lake exe cache get
+    ```
+    This will download and unpack the pre-compiled files for `mathlib`, making them available to the Lean server.
+
 ## Usage
 
 The `lean-lsp` script acts as both a server and a client.
@@ -55,7 +74,14 @@ The `lean-lsp` script acts as both a server and a client.
     cd my-lean-project
     ```
 
-2.  **Start the server from within the project directory:**
+2.  **Add and build dependencies:**
+    Edit your `lakefile.toml` to add dependencies like `mathlib`. Then, from the project directory, get the pre-compiled cache.
+    ```bash
+    # This only needs to be run once, or when mathlib's version changes.
+    lake exe cache get
+    ```
+
+3.  **Start the server from within the project directory:**
     You will need to run the `lean-lsp` script from your project directory. You can use a relative or absolute path to the script. For example, if the `lean-lsp` repository is in the parent directory, you would run:
     ```bash
     ../lean-lsp/lean-lsp start --host 0.0.0.0

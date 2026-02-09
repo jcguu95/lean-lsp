@@ -22,7 +22,7 @@ DOCKER_IMAGE_NAME="lean-aider"
 # --- Script ---
 
 # Ensure we are running from the project root.
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")"
 
 # --- Setup ---
 echo "--- 1. Setting up example project ---"
@@ -51,18 +51,18 @@ cleanup() {
     echo
     echo "--- Stopping any running server ---"
     # Use || true to prevent the script from exiting with an error if the server is already stopped.
-    ./bin/lean-lsp stop --host 0.0.0.0 || true
+    ./lean-lsp stop --host 0.0.0.0 || true
 }
 trap cleanup EXIT
 
 # --- Run example-project tests ---
 echo "--- Running tests for example-project ---"
-(cd example-project && ../bin/lean-lsp start --host 0.0.0.0)
+(cd example-project && ../lean-lsp start --host 0.0.0.0)
 echo "Server started for example-project."
 
 # Host test
 echo "--- Running host test query for example-project ---"
-OUTPUT=$(./bin/lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
+OUTPUT=$(./lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
 if [[ "$OUTPUT" == *"Nat.Prime"* ]]; then
   echo "✅ Host Test PASSED for example-project"
 else
@@ -77,7 +77,7 @@ if ! docker info > /dev/null 2>&1; then
 else
     DOCKER_OUTPUT=$(docker run --rm \
       --user "$(id -u):$(id -g)" \
-      --entrypoint /app/bin/lean-lsp \
+      --entrypoint /app/lean-lsp \
       -v "$HOST_PROJECT_PATH":/app \
       "$DOCKER_IMAGE_NAME" \
       hover --host host.docker.internal \
@@ -92,7 +92,7 @@ else
       exit 1
     fi
 fi
-./bin/lean-lsp stop --host 0.0.0.0
+./lean-lsp stop --host 0.0.0.0
 echo "Server stopped for example-project."
 echo
 echo "--- All example-project tests passed! ---"

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Clarified that installation instructions in `docs/INSTALLATION.md` are for macOS.
 - Simplified `README.md` to focus on prerequisites and usage. Moved detailed setup, installation, and architecture information to `docs/INSTALLATION.md`.
 - Further generalized `README.md` to focus on `lean-lsp`'s client-server architecture, removing specific references to the Docker/agent use-case.
 - Refactored documentation to be more general. The main `README.md` now describes the `lean-lsp` tool, and agent-specific setup instructions have been moved to `docs/AGENT_SETUP.md`.

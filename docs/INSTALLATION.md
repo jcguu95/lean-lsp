@@ -10,9 +10,9 @@ This guide covers how to set up your environment to use `lean-lsp`.
 
 This setup decouples the client from the Lean environment, allowing lightweight clients to query a full Lean installation from anywhere on the network.
 
-## Host Installation
+## Host Installation (macOS)
 
-On your host machine, you need to install the Lean toolchain, which includes `lake`, the Lean build manager and language server. The recommended way to do this is using `elan`, the Lean toolchain manager.
+These instructions are for macOS. On your host machine, you need to install the Lean toolchain, which includes `lake`, the Lean build manager and language server. The recommended way to do this is using `elan`, the Lean toolchain manager.
 
 1.  **Install elan:**
     You can install `elan` using Homebrew on macOS:

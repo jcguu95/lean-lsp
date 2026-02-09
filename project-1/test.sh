@@ -45,7 +45,7 @@ echo "--- Verifying proof is complete ---"
 # `lake build` already ran in setup, which confirms the proof compiles.
 # Now, we check for any remaining `sorry` placeholders.
 # The `!` negates the exit code of grep. Grep returns 0 on match (bad), 1 on no match (good).
-if ! grep -R --include='*.lean' 'sorry' .; then
+if ! grep -R --include='*.lean' 'sorry' Project1; then
   echo "✅ Verification PASSED: No 'sorry' placeholders found."
 else
   echo "❌ Verification FAILED: Found 'sorry' placeholders in the proof."

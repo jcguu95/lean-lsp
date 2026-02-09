@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-02-09
+
+### Fixed
+- Corrected the line and column numbers in `test.sh` for the `project-1` hover query to correctly target the theorem name.
+
 ### Changed
 - Updated `SKILL.md` to reflect the current TCP-based client/server architecture.
 - Clarified the role of the `lean-lsp` script as a wrapper for the Lean LSP server in `README.md` and the script's docstring.

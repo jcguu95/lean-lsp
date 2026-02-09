@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+A command-line tool to manage and interact with a Lean LSP server.
+
+This script acts as a client/server wrapper around the actual Lean LSP server
+(typically started with `lake serve`). It starts the LSP server as a background
+daemon process and provides a simple TCP interface for clients to send LSP
+requests and notifications. This architecture allows clients (like an agent in a
+Docker container) to communicate with the Lean server without needing to manage
+the LSP process lifetime or speak the full Language Server Protocol directly over
+stdio.
+"""
 from __future__ import annotations
 
 import argparse

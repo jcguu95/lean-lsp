@@ -8,7 +8,7 @@ The development environment consists of:
 1.  A Docker container where this software developer agent runs.
 2.  The host machine (macOS) where LEAN and mathlib are installed.
 
-Communication between the agent in the Docker container and the LEAN process on the host machine will be handled via a TCP socket.
+The `lean-lsp` script acts as a client/server wrapper for the actual Lean Language Server Protocol (LSP) server (`lake serve`). It starts the LSP server as a daemon on the host and exposes a simple TCP socket interface. The agent, running in the container, uses `lean-lsp` as a client to send requests to this TCP socket, which are then forwarded to the real LSP server.
 
 ## Rationale
 

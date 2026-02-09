@@ -8,10 +8,10 @@ The image is based on `paulgauthier/aider-full` and includes:
 
 ## Building the Image
 
-To build the `aider-lean` Docker image, run the following command from the **root directory of this repository**:
+To build the `aider-lean` Docker image, run the following command from **this directory (`agent/`)**:
 
 ```bash
-docker build -t aider-lean -f agent/Dockerfile .
+docker build -t aider-lean -f Dockerfile ..
 ```
 
 **Note:** The first build will take a significant amount of time (20-30 minutes) as it downloads and compiles `mathlib`. Subsequent builds will be much faster due to Docker's caching.

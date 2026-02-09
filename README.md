@@ -55,6 +55,5 @@ Client commands connect to the running server to send LSP requests. When the cli
 ### Notes & Tips
 - **This is not the LSP server itself.** It's a wrapper around `lake serve`.
 - The server (`start` command) must be running from within a Lean project directory.
-- The client commands are typically run from the repository root because the examples use relative paths (e.g. `./bin/lean-lsp`).
 - **Tip:** The `agent/` directory contains a complete Docker-based setup for a development environment with Aider, Lean, `mathlib`, and `lean-lsp`. See [`agent/README.md`](./agent/README.md) for details.
 - **Tip:** For instructions on how to install Lean and verify your setup, see the [Installation and Setup Guide](./docs/INSTALLATION.md).

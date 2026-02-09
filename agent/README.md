@@ -1,6 +1,6 @@
-# Aider-Lean Docker Environment
+# Lean-Aider Docker Environment
 
-This directory contains a `Dockerfile` to build a Docker image named `aider-lean`. This image provides a complete development environment for the [Lean 4](https://lean-lang.org/) programming language, integrated with [Aider](https://github.com/paul-gauthier/aider), an AI-powered coding assistant.
+This directory contains a `Dockerfile` to build a Docker image named `lean-aider`. This image provides a complete development environment for the [Lean 4](https://lean-lang.org/) programming language, integrated with [Aider](https://github.com/paul-gauthier/aider), an AI-powered coding assistant.
 
 The image is based on `paulgauthier/aider-full` and includes:
 - The `elan` toolchain manager with a stable version of Lean.
@@ -8,10 +8,10 @@ The image is based on `paulgauthier/aider-full` and includes:
 
 ## Building the Image
 
-To build the `aider-lean` Docker image, run the following command from **this directory (`agent/`)**:
+To build the `lean-aider` Docker image, run the following command from **this directory (`agent/`)**:
 
 ```bash
-docker build -t aider-lean -f Dockerfile ..
+docker build -t lean-aider -f Dockerfile ..
 ```
 
 ### A Note on the Build Context
@@ -20,7 +20,7 @@ This command uses `..` to set the "build context" to the root of the repository.
 
 For the build to be fast, a `.dockerignore` file is placed in the repository root to exclude large directories like `.git` and `.lake/` from the build context. This is a standard practice and is the most effective way to manage build performance while allowing the `Dockerfile` to access necessary files from the repository.
 
-**Note:** The first build will take a significant amount of time (20-30 minutes) as it downloads and compiles `mathlib`. Subsequent builds will be much faster due to Docker's caching.
+**Note:** The first build will take a significant amount of time (20-30 minutes) as it downloads the pre-compiled `mathlib`. Subsequent builds will be much faster due to Docker's caching.
 
 ## Testing the Environment
 
@@ -28,7 +28,7 @@ The Docker image includes `lean-lsp`, a test script (`test-lean-lsp.sh`), and a 
 
 1.  Start a container with an interactive shell:
     ```bash
-    docker run -it --rm aider-lean bash
+    docker run -it --rm lean-aider bash
     ```
 
 2.  Inside the container, run the test script:
@@ -47,13 +47,12 @@ This command mounts your current project directory into the container, sets up y
 docker run -it --rm \
   --user "$(id -u):$(id -g)" \
   --volume "$(pwd):/app" \
-  --volume "$HOME/.cache/mathlib:/home/appuser/.cache/mathlib" \
   --env GIT_AUTHOR_NAME="$(git config user.name)" \
   --env GIT_AUTHOR_EMAIL="$(git config user.email)" \
   --env GIT_COMMITTER_NAME="$(git config user.name)" \
   --env GIT_COMMITTER_EMAIL="$(git config user.email)" \
   --env GEMINI_API_KEY="YOUR_API_KEY" \
-  aider-lean \
+  lean-aider \
   --model gemini/gemini-2.5-pro \
   --no-stream \
   --weak-model gemini/gemini-2.0-flash-lite
@@ -67,7 +66,7 @@ docker run -it --rm \
 - `--volume "$(pwd):/app"`: Mounts the current directory on your host into the `/app` directory inside the container.
 - `--volume "$HOME/.cache/mathlib:/home/appuser/.cache/mathlib"`: Mounts a directory from your host to the `mathlib` cache location in the container. This preserves the cache between container runs.
 - `--env ...`: Sets environment variables for `git` and your `GEMINI_API_KEY`. **Remember to replace `"YOUR_API_KEY"` with your actual key.**
-- `aider-lean`: The name of the image to run.
+- `lean-aider`: The name of the image to run.
 - `...`: Arguments passed to `aider` at the end of the command.
 
 ## Usage

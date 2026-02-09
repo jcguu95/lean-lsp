@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - The `start` command now provides feedback that it is starting, instead of hanging silently.
+- Fixed a bug where the daemon process was spawned with incorrect argument order, causing a crash.
 
 ## [0.1.0] - 2026-02-09
 

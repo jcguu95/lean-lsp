@@ -519,11 +519,11 @@ def spawn_daemon(config: DaemonConfig, verbose: bool = False) -> subprocess.Pope
     cmd = [
         sys.executable,
         str(script_path),
+        "daemon",
         "--host",
         host,
         "--port",
         str(port),
-        "daemon",
         "--server-cmd",
         config.server_cmd,
         "--timeout",

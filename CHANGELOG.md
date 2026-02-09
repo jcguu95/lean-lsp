@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added `mathlib` as a dependency to the test project.
+- Updated test project to import and check a `mathlib` definition.
 
 ## [0.2.0] - 2026-02-09
 

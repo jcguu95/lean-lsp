@@ -24,6 +24,12 @@ DEFAULT_SERVER_HOST = "127.0.0.1"
 DEFAULT_PORT = 9123
 
 
+# NOTE: TCP sockets are used instead of Unix sockets to allow for communication
+# across network boundaries, such as between a Docker container and the host machine.
+# While Unix sockets can be shared with containers via volume mounts, TCP is a more
+# standard, portable, and straightforward solution for this architecture.
+
+
 def resolve_address(
     host_arg: str | None, port_arg: int | None
 ) -> tuple[str, int]:

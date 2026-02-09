@@ -1,5 +1,6 @@
-[WARNING: This document is still a draft. The proposed method does not work yet, as
-a linux-based docker container cannot run macOS's binary directy.]
+[WARNING: This is an experimental and untested feature. The `lean-exec` proxy
+is a proposed solution to the architecture mismatch error, but it has not been
+verified to work yet.]
 
 # Aider with Lean Integration
 

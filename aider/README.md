@@ -1,32 +1,19 @@
-[WARNING: This is an experimental and untested feature. The `lean-exec` proxy
-is a proposed solution to the architecture mismatch error, but it has not been
-verified to work yet.]
-
 # Aider with Lean Integration
 
-This guide explains how to set up and run a Dockerized Aider environment that can interact with the Lean theorem prover on your host machine.
+This guide explains how to set up and run a Dockerized Aider environment that can interact with the Lean theorem prover.
 
-This setup uses a secure proxy (`lean-exec`) to forward `lean` and `lake` commands from the Aider container to your host. This avoids CPU architecture mismatch errors and keeps the Docker image small, as Lean does not need to be installed inside it.
+This setup installs a complete, self-contained Lean toolchain inside the Docker image. This is the most secure and robust approach, as it fully isolates the environment and automatically handles CPU architecture differences between your host machine and the container.
 
-## 1. Start the Command Server (on Host)
+## 1. Build the Docker Image
 
-In a terminal on your host machine, start the `lean-exec` server from the root of the `lean-lsp` repository. This server will listen for commands from the Aider container.
+First, you need to build the `lean-aider` Docker image. This image is based on `paulgauthier/aider-full` and installs `elan`, the Lean toolchain manager.
 
-```bash
-./bin/lean-exec server
-```
-Leave this terminal running.
-
-## 2. Build the Docker Image (on Host)
-
-In a second terminal, build the `lean-aider` Docker image. This image contains wrapper scripts that forward `lean` and `lake` commands to the server you just started.
-
-From within this `aider/` directory, run:
+From within this `aider/` directory, run the following command:
 ```bash
 docker build -t lean-aider .
 ```
 
-## 3. Run the Aider Container (on Host)
+## 2. Run the Aider Container
 
 Once the image is built, you can start the Aider container.
 
@@ -65,7 +52,7 @@ docker_args=(
 docker "${docker_args[@]}"
 ```
 
-## 4. Verify the Setup
+## 3. Verify the Setup
 
 After running the command above, you will be inside the Aider chat interface. To verify that Lean is correctly configured, you can ask Aider to run a shell command.
 
@@ -74,7 +61,7 @@ Type the following at the Aider prompt:
 /run lean --version
 ```
 
-Aider should execute the command via the proxy and show you the version of Lean from your host machine, for example:
+Aider should execute the command and show you the version of Lean from your host machine, for example:
 ```
 Lean (version 4.8.0-rc1, commit 1234567890ab, Release)
 ```

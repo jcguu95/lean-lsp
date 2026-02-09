@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Updated `project-1/test.sh` to verify proofs by building and checking for `sorry`, instead of using LSP hover commands.
 - Refactored the main `test.sh` to be minimal and only test `example-project`.
 
 ### Added

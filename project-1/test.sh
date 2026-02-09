@@ -40,53 +40,14 @@ fi
 echo "Setup complete."
 echo
 
-# --- Test Suite ---
-# Define a cleanup function to stop the server when the script exits.
-cleanup() {
-    echo
-    echo "--- Stopping any running server ---"
-    # Use || true to prevent the script from exiting with an error if the server is already stopped.
-    ../lean-lsp stop --host 0.0.0.0 || true
-}
-trap cleanup EXIT
-
-# --- Run project-1 tests ---
-echo "--- Running tests for project-1 ---"
-../lean-lsp start --host 0.0.0.0
-echo "Server started for project-1."
-
-# Host test
-echo "--- Running host test query for project-1 ---"
-OUTPUT=$(../lean-lsp hover --host 127.0.0.1 Project1/SumOfOdd.lean 7 9)
-if [[ "$OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
-  echo "✅ Host Test PASSED for project-1"
+# --- Verification ---
+echo "--- Verifying proof is complete ---"
+# `lake build` already ran in setup, which confirms the proof compiles.
+# Now, we check for any remaining `sorry` placeholders.
+# The `!` negates the exit code of grep. Grep returns 0 on match (bad), 1 on no match (good).
+if ! grep -R --include='*.lean' 'sorry' .; then
+  echo "✅ Verification PASSED: No 'sorry' placeholders found."
 else
-  echo "❌ Host Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
+  echo "❌ Verification FAILED: Found 'sorry' placeholders in the proof."
   exit 1
 fi
-
-# Docker test
-echo "--- Running Docker test query for project-1 ---"
-if ! docker info > /dev/null 2>&1; then
-    echo "⚠️  Docker is not running. Skipping Docker test."
-else
-    DOCKER_OUTPUT=$(docker run --rm \
-      --user "$(id -u):$(id -g)" \
-      --entrypoint /app/lean-lsp \
-      -v "$HOST_PROJECT_PATH":/app \
-      "$DOCKER_IMAGE_NAME" \
-      hover --host host.docker.internal \
-      --map-root-from /app \
-      --map-root-to "$HOST_PROJECT_PATH" \
-      project-1/Project1/SumOfOdd.lean 7 9)
-
-    if [[ "$DOCKER_OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
-      echo "✅ Docker Test PASSED for project-1"
-    else
-      echo "❌ Docker Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
-      exit 1
-    fi
-fi
-# Final server stop is handled by the cleanup trap
-echo
-echo "--- All tests for project-1 passed! ---"

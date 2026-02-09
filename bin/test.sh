@@ -11,18 +11,14 @@ set -euo pipefail
 # container to the server on the host.
 #
 # You can provide this as the first argument to the script, or set it here directly.
-# NOTE: The default path below is pre-configured for a specific environment.
-# You may need to change it or pass the path as an argument.
-HOST_PROJECT_PATH=${1:-"/Users/jin/lean-lsp"}
+# This script assumes it is run from the project root.
+HOST_PROJECT_PATH=${1:-"$(pwd)"}
 
 # Name of the Docker image to use for the test. This should be an image
 # that has this repository's code available at /app.
 DOCKER_IMAGE_NAME="lean-aider"
 
 # --- Script ---
-
-# Ensure we are running from the project root.
-cd "$(dirname "$0")"
 
 # --- Setup ---
 echo "--- 1. Setting up example project ---"
@@ -51,18 +47,18 @@ cleanup() {
     echo
     echo "--- Stopping any running server ---"
     # Use || true to prevent the script from exiting with an error if the server is already stopped.
-    ./lean-lsp stop --host 0.0.0.0 || true
+    ./bin/lean-lsp stop --host 0.0.0.0 || true
 }
 trap cleanup EXIT
 
 # --- Run example-project tests ---
 echo "--- Running tests for example-project ---"
-(cd example-project && ../lean-lsp start --host 0.0.0.0)
+(cd example-project && ../bin/lean-lsp start --host 0.0.0.0)
 echo "Server started for example-project."
 
 # Host test
 echo "--- Running host test query for example-project ---"
-OUTPUT=$(./lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
+OUTPUT=$(./bin/lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
 if [[ "$OUTPUT" == *"Nat.Prime"* ]]; then
   echo "✅ Host Test PASSED for example-project"
 else
@@ -77,7 +73,7 @@ if ! docker info > /dev/null 2>&1; then
 else
     DOCKER_OUTPUT=$(docker run --rm \
       --user "$(id -u):$(id -g)" \
-      --entrypoint /app/lean-lsp \
+      --entrypoint /app/bin/lean-lsp \
       -v "$HOST_PROJECT_PATH":/app \
       "$DOCKER_IMAGE_NAME" \
       hover --host host.docker.internal \
@@ -92,7 +88,7 @@ else
       exit 1
     fi
 fi
-./lean-lsp stop --host 0.0.0.0
+./bin/lean-lsp stop --host 0.0.0.0
 echo "Server stopped for example-project."
 echo
 echo "--- All example-project tests passed! ---"

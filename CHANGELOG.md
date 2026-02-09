@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Corrected the `mathlib` import in the test project to point to a specific file (`Prime.Basic`) instead of a directory module.
 - Improved path-mapping logic to be more robust by using string operations instead of filesystem-dependent path resolution.
 
 ## [0.3.0] - 2026-02-09

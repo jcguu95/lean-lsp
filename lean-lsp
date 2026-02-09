@@ -678,26 +678,17 @@ def with_open_file(
     map_root_from: str | None = None,
     map_root_to: str | None = None,
 ) -> Any:
-    print(f"DEBUG: file_path={file_path}", file=sys.stderr)
-    print(f"DEBUG: map_root_from={map_root_from}", file=sys.stderr)
-    print(f"DEBUG: map_root_to={map_root_to}", file=sys.stderr)
     mapped_uri = file_path.as_uri()
     if map_root_from and map_root_to:
-        try:
-            from_prefix = Path(map_root_from).resolve()
-            to_prefix = Path(map_root_to).resolve()
-            print(f"DEBUG: from_prefix={from_prefix}", file=sys.stderr)
-            print(f"DEBUG: to_prefix={to_prefix}", file=sys.stderr)
-            if file_path.is_relative_to(from_prefix):
-                print("DEBUG: is_relative_to is True", file=sys.stderr)
-                mapped_path = to_prefix / file_path.relative_to(from_prefix)
-                mapped_uri = mapped_path.as_uri()
-            else:
-                print("DEBUG: is_relative_to is False", file=sys.stderr)
-        except ValueError:
-            pass  # file_path is not relative to from_prefix
+        # Use string manipulation for robustness, as paths may not exist on client.
+        client_path_str = str(file_path)
+        if client_path_str.startswith(map_root_from):
+            relative_part = client_path_str[len(map_root_from) :]
+            if relative_part.startswith(os.path.sep):
+                relative_part = relative_part[len(os.path.sep) :]
+            host_path = Path(map_root_to) / relative_part
+            mapped_uri = host_path.as_uri()
 
-    print(f"DEBUG: mapped_uri={mapped_uri}", file=sys.stderr)
     open_params = did_open_params(file_path, language_id, version)
     open_params["textDocument"]["uri"] = mapped_uri
     send_notify(

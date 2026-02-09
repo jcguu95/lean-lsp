@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- Added debug logging to the path-mapping logic to diagnose client/server path issues.
+### Fixed
+- Improved path-mapping logic to be more robust by using string operations instead of filesystem-dependent path resolution.
 
 ## [0.3.0] - 2026-02-09
 

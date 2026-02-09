@@ -66,9 +66,15 @@ The `lean-lsp` script acts as both a server and a client.
 
 To communicate with the server running on the host, you will need the host's IP address as seen from the container. Inside a Docker container, you can often use `host.docker.internal` to refer to the host machine.
 
-Run client commands by specifying the host:
-```bash
-./lean-lsp hover --host host.docker.internal path/to/MyTheorem.lean 10 5
-```
+**IMPORTANT:** All client commands must be run from the root of the `lean-lsp` repository directory. This is because the script needs to find and read local files before sending requests to the server, and its working directory inside the container (`/app`) corresponds to your project root on the host.
 
-This will connect to the server on the host machine and execute the `hover` command.
+Run client commands by specifying the host and providing file paths relative to the project root. Because the client (in Docker) and server (on macOS) have different views of the filesystem, you must also provide path mappings.
+
+```bash
+# General example with path mapping, run from the lean-lsp project root:
+./lean-lsp hover --host host.docker.internal \
+  --map-root-from /app \
+  --map-root-to $(pwd) \
+  path/to/your/file.lean 10 5
+```
+This connects to the server on the host machine and executes the `hover` command, correctly translating the file path.

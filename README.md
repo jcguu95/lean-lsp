@@ -78,7 +78,7 @@ The `lean-lsp` script acts as both a server and a client.
     ```
 
 2.  **Add and build dependencies:**
-    Edit your `lakefile.toml` to add dependencies like `mathlib`. Then, from the project directory, update your dependencies, build the `cache` tool, and get the pre-compiled cache.
+    Edit your `lakefile.toml` to add dependencies like `mathlib`. Then, from the project directory, update your dependencies and get the pre-compiled cache.
     ```bash
     # After adding a dependency, run these commands.
     # If `lake update` seems to do nothing, try removing `lake-manifest.json` first.
@@ -86,7 +86,13 @@ The `lean-lsp` script acts as both a server and a client.
     lake exe mathlib/cache get
     ```
 
-3.  **Start the server from within the project directory:**
+3.  **Build the project:**
+    Before starting the server, build your project to compile local files and ensure dependencies are correctly linked.
+    ```bash
+    lake build
+    ```
+
+4.  **Start the server from within the project directory:**
     You will need to run the `lean-lsp` script from your project directory. You can use a relative or absolute path to the script. For example, if the `lean-lsp` repository is in the parent directory, you would run:
     ```bash
     ../lean-lsp/lean-lsp start --host 0.0.0.0

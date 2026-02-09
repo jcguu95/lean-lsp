@@ -16,6 +16,21 @@ docker build -t aider-lean -f agent/Dockerfile .
 
 **Note:** The first build will take a significant amount of time (20-30 minutes) as it downloads and compiles `mathlib`. Subsequent builds will be much faster due to Docker's caching.
 
+## Testing the Environment
+
+The Docker image includes `lean-lsp`, a test script (`test.sh`), and a sample Lean project (`test-project`) to verify that the environment is set up correctly. You can run the built-in test script to ensure everything is working.
+
+1.  Start a container with an interactive shell:
+    ```bash
+    docker run -it --rm aider-lean bash
+    ```
+
+2.  Inside the container, run the test script:
+    ```bash
+    test.sh
+    ```
+    The script will start the `lean-lsp` daemon, run checks against the included `test-project`, and then stop the daemon. A successful run will exit with code 0.
+
 ## Running the Container
 
 To start an interactive session, navigate to the directory on your host machine that you want to work in (this will typically be the root of a Lean project) and run the following command. You do not need to be in the `agent` directory to run this.

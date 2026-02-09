@@ -20,16 +20,25 @@ VERSION = "0.1.0"
 DEFAULT_SERVER_CMD = "lake serve"
 DEFAULT_DAEMON_TIMEOUT = 30
 DEFAULT_START_WAIT = 30
-DEFAULT_SOCKET_BASENAME = "lean-lsp.sock"
+DEFAULT_SERVER_HOST = "127.0.0.1"
+DEFAULT_PORT = 9123
 
 
-def resolve_socket_path(socket_arg: str | None) -> Path:
-    if socket_arg:
-        return Path(socket_arg)
-    env_value = os.environ.get("LEAN_LSP_SOCKET")
-    if env_value:
-        return Path(env_value)
-    return Path.cwd() / DEFAULT_SOCKET_BASENAME
+def resolve_address(
+    host_arg: str | None, port_arg: int | None
+) -> tuple[str, int]:
+    host = host_arg or os.environ.get("LEAN_LSP_HOST")
+    port_str = (
+        str(port_arg) if port_arg is not None else os.environ.get("LEAN_LSP_PORT")
+    )
+    if not port_str:
+        port = DEFAULT_PORT
+    else:
+        try:
+            port = int(port_str)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("port must be an integer") from exc
+    return host, port
 
 
 def load_json_arg(
@@ -60,7 +69,7 @@ def json_dumps(value: Any, *, pretty: bool = False) -> str:
 
 @dataclass(frozen=True)
 class DaemonConfig:
-    socket_path: Path
+    address: tuple[str, int]
     root_dir: Path
     server_cmd: str
     timeout: int
@@ -371,19 +380,19 @@ def handle_client_request(
 
 def serve(
     lsp_conn: LspConnection,
-    socket_path: Path,
+    address: tuple[str, int],
     timeout: int,
     stop_event: threading.Event,
     server_proc: subprocess.Popen | None,
     logger: logging.Logger,
 ) -> None:
-    if socket_path.exists():
-        socket_path.unlink()
-    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    server.bind(str(socket_path))
+    host, port = address
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(address)
     server.listen(5)
     server.settimeout(1.0)
-    logger.info("listening on %s", socket_path)
+    logger.info("listening on %s:%s", host, port)
 
     try:
         while not stop_event.is_set():
@@ -415,12 +424,12 @@ def serve(
         server.close()
 
 
-def ping_socket(socket_path: Path, timeout: float = 1.0) -> bool:
+def ping_socket(address: tuple[str, int], timeout: float = 1.0) -> bool:
     payload = json.dumps({"op": "ping"}, separators=(",", ":")).encode("utf-8")
     try:
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(timeout)
-            sock.connect(str(socket_path))
+            sock.connect(address)
             sock.sendall(payload)
             sock.shutdown(socket.SHUT_WR)
             chunks: list[bytes] = []
@@ -437,39 +446,16 @@ def ping_socket(socket_path: Path, timeout: float = 1.0) -> bool:
         return False
 
 
-def is_daemon_running(socket_path: Path) -> bool:
-    if not socket_path.exists():
-        return False
-    if not socket_path.is_socket():
-        return False
-    return ping_socket(socket_path)
-
-
-def ensure_socket_parent(socket_path: Path) -> None:
-    if socket_path.parent and not socket_path.parent.exists():
-        socket_path.parent.mkdir(parents=True, exist_ok=True)
-
-
-def validate_socket_path(socket_path: Path) -> None:
-    if socket_path.exists() and not socket_path.is_socket():
-        raise RuntimeError(f"socket path exists and is not a socket: {socket_path}")
+def is_daemon_running(address: tuple[str, int]) -> bool:
+    return ping_socket(address)
 
 
 def run_daemon(config: DaemonConfig) -> int:
     logger = setup_logging(config.log_level, config.log_file)
-    socket_path = config.socket_path.resolve()
-    try:
-        validate_socket_path(socket_path)
-    except RuntimeError as exc:
-        logger.error(str(exc))
-        return 2
-    ensure_socket_parent(socket_path)
-    if socket_path.exists() and socket_path.is_socket():
-        if ping_socket(socket_path):
-            logger.info("daemon already running at %s", socket_path)
-            return 0
-        logger.warning("removing stale socket: %s", socket_path)
-        socket_path.unlink()
+    address = config.address
+    if is_daemon_running(address):
+        logger.info("daemon already running at %s:%s", *address)
+        return 0
 
     root_dir = config.root_dir.resolve()
     server_cmd = shlex.split(config.server_cmd)
@@ -505,11 +491,9 @@ def run_daemon(config: DaemonConfig) -> int:
     signal.signal(signal.SIGTERM, handle_signal)
 
     try:
-        serve(lsp_conn, socket_path, config.timeout, stop_event, proc, logger)
+        serve(lsp_conn, config.address, config.timeout, stop_event, proc, logger)
     finally:
         stop_event.set()
-        if socket_path.exists():
-            socket_path.unlink()
         if not lsp_conn.closed:
             lsp_conn.request("shutdown", None, config.timeout)
             try:
@@ -520,10 +504,10 @@ def run_daemon(config: DaemonConfig) -> int:
     return 0
 
 
-def wait_for_daemon(socket_path: Path, wait_seconds: int) -> bool:
+def wait_for_daemon(address: tuple[str, int], wait_seconds: int) -> bool:
     deadline = time.monotonic() + wait_seconds
     while time.monotonic() < deadline:
-        if is_daemon_running(socket_path):
+        if is_daemon_running(address):
             return True
         time.sleep(0.2)
     return False
@@ -531,11 +515,14 @@ def wait_for_daemon(socket_path: Path, wait_seconds: int) -> bool:
 
 def spawn_daemon(config: DaemonConfig) -> subprocess.Popen:
     script_path = Path(__file__).resolve()
+    host, port = config.address
     cmd = [
         sys.executable,
         str(script_path),
-        "--socket",
-        str(config.socket_path),
+        "--host",
+        host,
+        "--port",
+        str(port),
         "daemon",
         "--server-cmd",
         config.server_cmd,
@@ -561,14 +548,16 @@ def spawn_daemon(config: DaemonConfig) -> subprocess.Popen:
     )
 
 
-def daemon_config_from_args(args: argparse.Namespace, socket_path: Path) -> DaemonConfig:
+def daemon_config_from_args(
+    args: argparse.Namespace, host: str, port: int
+) -> DaemonConfig:
     try:
         capabilities = load_json_arg(args.capabilities, default={}, label="capabilities")
     except ValueError as exc:
         raise RuntimeError(str(exc)) from exc
     root_dir = Path(args.root).resolve() if args.root else Path.cwd().resolve()
     return DaemonConfig(
-        socket_path=socket_path,
+        address=(host, port),
         root_dir=root_dir,
         server_cmd=args.server_cmd,
         timeout=args.timeout,
@@ -580,13 +569,7 @@ def daemon_config_from_args(args: argparse.Namespace, socket_path: Path) -> Daem
 
 
 def start_daemon(config: DaemonConfig, wait_seconds: int, foreground: bool) -> int:
-    try:
-        validate_socket_path(config.socket_path)
-    except RuntimeError as exc:
-        print(str(exc), file=sys.stderr)
-        return 2
-
-    if is_daemon_running(config.socket_path):
+    if is_daemon_running(config.address):
         print("already running")
         return 0
 
@@ -594,45 +577,24 @@ def start_daemon(config: DaemonConfig, wait_seconds: int, foreground: bool) -> i
         return run_daemon(config)
 
     spawn_daemon(config)
-    if wait_for_daemon(config.socket_path, wait_seconds):
+    if wait_for_daemon(config.address, wait_seconds):
         print("started")
         return 0
     print("daemon failed to start", file=sys.stderr)
     return 1
 
 
-def auto_start_daemon(socket_path: Path) -> None:
-    if is_daemon_running(socket_path):
-        return
-    validate_socket_path(socket_path)
-    config = DaemonConfig(
-        socket_path=socket_path,
-        root_dir=Path.cwd().resolve(),
-        server_cmd=DEFAULT_SERVER_CMD,
-        timeout=DEFAULT_DAEMON_TIMEOUT,
-        capabilities={},
-        log_level="info",
-        log_file=None,
-        pid_file=None,
-    )
-    spawn_daemon(config)
-    if not wait_for_daemon(socket_path, DEFAULT_START_WAIT):
-        raise RuntimeError("daemon failed to start")
 
 
 def send_payload(
-    socket_path: Path, payload: dict[str, Any], read_timeout: float | None
+    address: tuple[str, int], payload: dict[str, Any], read_timeout: float | None
 ) -> dict[str, Any]:
-    if not socket_path.exists():
-        raise RuntimeError(f"socket not found: {socket_path}")
-    if not socket_path.is_socket():
-        raise RuntimeError(f"path exists but is not a socket: {socket_path}")
     data = json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     try:
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             if read_timeout is not None:
                 sock.settimeout(read_timeout)
-            sock.connect(str(socket_path))
+            sock.connect(address)
             sock.sendall(data)
             sock.shutdown(socket.SHUT_WR)
             chunks: list[bytes] = []
@@ -652,24 +614,24 @@ def send_payload(
 
 
 def send_request(
-    socket_path: Path, method: str, params: dict[str, Any] | None, timeout: int
+    address: tuple[str, int], method: str, params: dict[str, Any] | None, timeout: int
 ) -> Any:
     payload: dict[str, Any] = {"op": "request", "method": method, "timeout": timeout}
     if params is not None:
         payload["params"] = params
-    resp = send_payload(socket_path, payload, read_timeout=timeout + 5)
+    resp = send_payload(address, payload, read_timeout=timeout + 5)
     if not resp.get("ok"):
         raise RuntimeError(resp.get("error", "unknown error"))
     return resp.get("result")
 
 
 def send_notify(
-    socket_path: Path, method: str, params: dict[str, Any] | None, timeout: int
+    address: tuple[str, int], method: str, params: dict[str, Any] | None, timeout: int
 ) -> None:
     payload: dict[str, Any] = {"op": "notify", "method": method}
     if params is not None:
         payload["params"] = params
-    resp = send_payload(socket_path, payload, read_timeout=timeout + 5)
+    resp = send_payload(address, payload, read_timeout=timeout + 5)
     if not resp.get("ok"):
         raise RuntimeError(resp.get("error", "unknown error"))
 
@@ -690,7 +652,7 @@ def did_close_params(file_path: Path) -> dict[str, Any]:
 
 
 def with_open_file(
-    socket_path: Path,
+    address: tuple[str, int],
     file_path: Path,
     language_id: str,
     version: int,
@@ -699,14 +661,14 @@ def with_open_file(
     action: Callable[[str], Any],
 ) -> Any:
     send_notify(
-        socket_path,
+        address,
         "textDocument/didOpen",
         did_open_params(file_path, language_id, version),
         timeout,
     )
     if wait_for_diagnostics:
         send_request(
-            socket_path,
+            address,
             "textDocument/waitForDiagnostics",
             {"uri": file_path.as_uri(), "version": version},
             timeout,
@@ -715,7 +677,7 @@ def with_open_file(
         return action(file_path.as_uri())
     finally:
         try:
-            send_notify(socket_path, "textDocument/didClose", did_close_params(file_path), timeout)
+            send_notify(address, "textDocument/didClose", did_close_params(file_path), timeout)
         except RuntimeError:
             pass
 
@@ -936,9 +898,15 @@ def add_daemon_args(parser: argparse.ArgumentParser) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Lean LSP daemon and client.")
     parser.add_argument(
-        "--socket",
+        "--host",
         default=None,
-        help="Unix socket path (default: $LEAN_LSP_SOCKET or ./lean-lsp.sock)",
+        help="Host for TCP socket (default: $LEAN_LSP_HOST, or 127.0.0.1 for server)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help=f"Port for TCP socket (default: $LEAN_LSP_PORT or {DEFAULT_PORT})",
     )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
     parser.add_argument("--version", action="version", version=f"lean-lsp {VERSION}")
@@ -1043,43 +1011,51 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    socket_path = resolve_socket_path(args.socket).resolve()
+    try:
+        host, port = resolve_address(args.host, args.port)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
 
     if args.command == "daemon":
+        if host is None:
+            host = DEFAULT_SERVER_HOST
         try:
-            config = daemon_config_from_args(args, socket_path)
+            config = daemon_config_from_args(args, host, port)
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 2
         return run_daemon(config)
 
     if args.command == "start":
+        if host is None:
+            host = DEFAULT_SERVER_HOST
         try:
-            config = daemon_config_from_args(args, socket_path)
+            config = daemon_config_from_args(args, host, port)
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 2
         return start_daemon(config, args.wait, args.foreground)
 
     if args.command == "check":
-        if socket_path.exists() and not socket_path.is_socket():
-            print(f"socket path exists and is not a socket: {socket_path}", file=sys.stderr)
+        if host is None:
+            print("host is required for check", file=sys.stderr)
             return 2
-        if is_daemon_running(socket_path):
+        if is_daemon_running((host, port)):
             print("ok")
             return 0
         print("not running", file=sys.stderr)
         return 1
 
     if args.command == "stop":
-        if not socket_path.exists():
+        if host is None:
+            print("host is required for stop", file=sys.stderr)
+            return 2
+        if not is_daemon_running((host, port)):
             print("not running")
             return 0
-        if socket_path.exists() and not socket_path.is_socket():
-            print(f"socket path exists and is not a socket: {socket_path}", file=sys.stderr)
-            return 2
         try:
-            resp = send_payload(socket_path, {"op": "shutdown"}, read_timeout=5.0)
+            resp = send_payload((host, port), {"op": "shutdown"}, read_timeout=5.0)
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 1
@@ -1089,16 +1065,30 @@ def main() -> int:
         print(resp.get("error", "unknown error"), file=sys.stderr)
         return 1
 
-    try:
-        auto_start_daemon(socket_path)
-    except RuntimeError as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
+    is_client_command = args.command in [
+        "notify",
+        "batch",
+        "request",
+        "plain-goal",
+        "plain-term-goal",
+        "hover",
+        "diagnostics",
+        "all",
+    ]
+    if is_client_command:
+        if host is None:
+            print("host is required for client commands", file=sys.stderr)
+            return 2
+        if not is_daemon_running((host, port)):
+            print(f"daemon not running at {host}:{port}", file=sys.stderr)
+            return 1
+
+    address = (host, port)
 
     if args.command == "notify":
         try:
             params = load_json_arg(args.params, default=None, label="params")
-            send_notify(socket_path, args.method, params, args.timeout)
+            send_notify(address, args.method, params, args.timeout)
         except (RuntimeError, ValueError) as exc:
             print(str(exc), file=sys.stderr)
             return 1
@@ -1119,9 +1109,7 @@ def main() -> int:
                 if isinstance(op, dict) and op.get("op") == "request":
                     op.setdefault("timeout", args.timeout)
         try:
-            resp = send_payload(
-                socket_path, {"op": "batch", "ops": ops}, read_timeout=None
-            )
+            resp = send_payload(address, {"op": "batch", "ops": ops}, read_timeout=None)
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 1
@@ -1154,10 +1142,10 @@ def main() -> int:
                     return 2
 
                 def action(_uri: str) -> Any:
-                    return send_request(socket_path, args.method, params, args.timeout)
+                    return send_request(address, args.method, params, args.timeout)
 
                 result = with_open_file(
-                    socket_path,
+                    address,
                     file_path,
                     args.language_id,
                     args.version_id,
@@ -1166,7 +1154,7 @@ def main() -> int:
                     action,
                 )
             else:
-                result = send_request(socket_path, args.method, params, args.timeout)
+                result = send_request(address, args.method, params, args.timeout)
         except RuntimeError as exc:
             print(str(exc), file=sys.stderr)
             return 1
@@ -1193,7 +1181,7 @@ def main() -> int:
 
             def action(uri: str) -> Any:
                 return send_request(
-                    socket_path,
+                    address,
                     "$/lean/plainGoal",
                     {
                         "textDocument": {"uri": uri},
@@ -1203,7 +1191,7 @@ def main() -> int:
                 )
 
             result = with_open_file(
-                socket_path,
+                address,
                 file_path,
                 "lean",
                 1,
@@ -1218,7 +1206,7 @@ def main() -> int:
 
             def action(uri: str) -> Any:
                 return send_request(
-                    socket_path,
+                    address,
                     "$/lean/plainTermGoal",
                     {
                         "textDocument": {"uri": uri},
@@ -1228,7 +1216,7 @@ def main() -> int:
                 )
 
             result = with_open_file(
-                socket_path,
+                address,
                 file_path,
                 "lean",
                 1,
@@ -1243,7 +1231,7 @@ def main() -> int:
 
             def action(uri: str) -> Any:
                 return send_request(
-                    socket_path,
+                    address,
                     "textDocument/hover",
                     {
                         "textDocument": {"uri": uri},
@@ -1253,7 +1241,7 @@ def main() -> int:
                 )
 
             result = with_open_file(
-                socket_path,
+                address,
                 file_path,
                 "lean",
                 1,
@@ -1268,7 +1256,7 @@ def main() -> int:
 
             def action(uri: str) -> Any:
                 session = send_request(
-                    socket_path, "$/lean/rpc/connect", {"uri": uri}, args.timeout
+                    address, "$/lean/rpc/connect", {"uri": uri}, args.timeout
                 )
                 session_id = (
                     session.get("sessionId") if isinstance(session, dict) else None
@@ -1276,7 +1264,7 @@ def main() -> int:
                 if session_id is None:
                     raise RuntimeError("rpc/connect missing sessionId")
                 diagnostics = send_request(
-                    socket_path,
+                    address,
                     "$/lean/rpc/call",
                     {
                         "textDocument": {"uri": uri},
@@ -1290,7 +1278,7 @@ def main() -> int:
                 return filter_diagnostics(diagnostics, line0, col0)
 
             result = with_open_file(
-                socket_path,
+                address,
                 file_path,
                 "lean",
                 1,
@@ -1305,7 +1293,7 @@ def main() -> int:
 
             def action(uri: str) -> Any:
                 plain_goal = send_request(
-                    socket_path,
+                    address,
                     "$/lean/plainGoal",
                     {
                         "textDocument": {"uri": uri},
@@ -1314,7 +1302,7 @@ def main() -> int:
                     args.timeout,
                 )
                 term_goal = send_request(
-                    socket_path,
+                    address,
                     "$/lean/plainTermGoal",
                     {
                         "textDocument": {"uri": uri},
@@ -1323,7 +1311,7 @@ def main() -> int:
                     args.timeout,
                 )
                 session = send_request(
-                    socket_path, "$/lean/rpc/connect", {"uri": uri}, args.timeout
+                    address, "$/lean/rpc/connect", {"uri": uri}, args.timeout
                 )
                 session_id = (
                     session.get("sessionId") if isinstance(session, dict) else None
@@ -1331,7 +1319,7 @@ def main() -> int:
                 if session_id is None:
                     raise RuntimeError("rpc/connect missing sessionId")
                 diagnostics = send_request(
-                    socket_path,
+                    address,
                     "$/lean/rpc/call",
                     {
                         "textDocument": {"uri": uri},
@@ -1350,7 +1338,7 @@ def main() -> int:
                 }
 
             result = with_open_file(
-                socket_path,
+                address,
                 file_path,
                 "lean",
                 1,

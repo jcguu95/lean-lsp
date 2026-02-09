@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-09
+
+This release establishes a stable, verifiable client-server architecture for interacting with the Lean LSP. The primary focus has been on creating a robust development and testing workflow that allows an agent within a Docker container to communicate with a Lean server running on the host machine.
+
+The next phase of development (v0.5.x) will focus on leveraging this setup for the agent to begin writing and querying real proofs in Lean.
+
 ### Added
 - Added a Docker-based test to `test.sh` to simulate and verify the agent's environment.
 - Added `test.sh` for a "one-click" verification of the client-server setup.

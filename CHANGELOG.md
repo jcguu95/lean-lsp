@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added path mapping flags (`--map-root-from`, `--map-root-to`) to support client/server running on different filesystems (e.g. Docker container and host).
 - Added `mathlib` as a dependency to the test project.
 - Updated test project to import and check a `mathlib` definition.
 

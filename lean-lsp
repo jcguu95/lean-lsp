@@ -675,25 +675,42 @@ def with_open_file(
     timeout: int,
     wait_for_diagnostics: bool,
     action: Callable[[str], Any],
+    map_root_from: str | None = None,
+    map_root_to: str | None = None,
 ) -> Any:
+    mapped_uri = file_path.as_uri()
+    if map_root_from and map_root_to:
+        try:
+            from_prefix = Path(map_root_from).resolve()
+            to_prefix = Path(map_root_to).resolve()
+            if file_path.is_relative_to(from_prefix):
+                mapped_path = to_prefix / file_path.relative_to(from_prefix)
+                mapped_uri = mapped_path.as_uri()
+        except ValueError:
+            pass  # file_path is not relative to from_prefix
+
+    open_params = did_open_params(file_path, language_id, version)
+    open_params["textDocument"]["uri"] = mapped_uri
     send_notify(
         address,
         "textDocument/didOpen",
-        did_open_params(file_path, language_id, version),
+        open_params,
         timeout,
     )
     if wait_for_diagnostics:
         send_request(
             address,
             "textDocument/waitForDiagnostics",
-            {"uri": file_path.as_uri(), "version": version},
+            {"uri": mapped_uri, "version": version},
             timeout,
         )
     try:
-        return action(file_path.as_uri())
+        return action(mapped_uri)
     finally:
         try:
-            send_notify(address, "textDocument/didClose", did_close_params(file_path), timeout)
+            close_params = did_close_params(file_path)
+            close_params["textDocument"]["uri"] = mapped_uri
+            send_notify(address, "textDocument/didClose", close_params, timeout)
         except RuntimeError:
             pass
 
@@ -916,6 +933,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
     parser.add_argument("--version", action="version", version=f"lean-lsp {VERSION}")
 
+    path_map_parser = argparse.ArgumentParser(add_help=False)
+    path_map_parser.add_argument(
+        "--map-root-from",
+        help="Path prefix on client to be replaced for host",
+    )
+    path_map_parser.add_argument(
+        "--map-root-to",
+        help="Path prefix on host",
+    )
+
     conn_parser = argparse.ArgumentParser(add_help=False)
     conn_parser.add_argument(
         "--host",
@@ -958,7 +985,9 @@ def parse_args() -> argparse.Namespace:
     )
 
     request_parser = subparsers.add_parser(
-        "request", help="Send a raw LSP request", parents=[conn_parser]
+        "request",
+        help="Send a raw LSP request",
+        parents=[conn_parser, path_map_parser],
     )
     request_parser.add_argument("--method", required=True, help="LSP method name")
     request_parser.add_argument(
@@ -1030,22 +1059,32 @@ def parse_args() -> argparse.Namespace:
         )
 
     add_position_args(
-        subparsers.add_parser("plain-goal", help="Lean plain goal", parents=[conn_parser])
-    )
-    add_position_args(
         subparsers.add_parser(
-            "plain-term-goal", help="Lean plain term goal", parents=[conn_parser]
+            "plain-goal", help="Lean plain goal", parents=[conn_parser, path_map_parser]
         )
     )
     add_position_args(
-        subparsers.add_parser("hover", help="Lean hover", parents=[conn_parser])
-    )
-    add_position_args(
-        subparsers.add_parser("diagnostics", help="Lean diagnostics", parents=[conn_parser])
+        subparsers.add_parser(
+            "plain-term-goal",
+            help="Lean plain term goal",
+            parents=[conn_parser, path_map_parser],
+        )
     )
     add_position_args(
         subparsers.add_parser(
-            "all", help="Lean goals + diagnostics", parents=[conn_parser]
+            "hover", help="Lean hover", parents=[conn_parser, path_map_parser]
+        )
+    )
+    add_position_args(
+        subparsers.add_parser(
+            "diagnostics",
+            help="Lean diagnostics",
+            parents=[conn_parser, path_map_parser],
+        )
+    )
+    add_position_args(
+        subparsers.add_parser(
+            "all", help="Lean goals + diagnostics", parents=[conn_parser, path_map_parser]
         )
     )
 
@@ -1200,6 +1239,8 @@ def main() -> int:
                     args.timeout,
                     args.wait_for_diagnostics,
                     action,
+                    map_root_from=args.map_root_from,
+                    map_root_to=args.map_root_to,
                 )
             else:
                 result = send_request(address, args.method, params, args.timeout)
@@ -1246,6 +1287,8 @@ def main() -> int:
                 args.timeout,
                 wait_for_diagnostics,
                 action,
+                map_root_from=args.map_root_from,
+                map_root_to=args.map_root_to,
             )
             render_output("plainGoal", result, args.json, args.pretty)
             return 0
@@ -1271,6 +1314,8 @@ def main() -> int:
                 args.timeout,
                 wait_for_diagnostics,
                 action,
+                map_root_from=args.map_root_from,
+                map_root_to=args.map_root_to,
             )
             render_output("plainTermGoal", result, args.json, args.pretty)
             return 0
@@ -1296,6 +1341,8 @@ def main() -> int:
                 args.timeout,
                 wait_for_diagnostics,
                 action,
+                map_root_from=args.map_root_from,
+                map_root_to=args.map_root_to,
             )
             render_output("hover", result, args.json, args.pretty)
             return 0
@@ -1333,6 +1380,8 @@ def main() -> int:
                 args.timeout,
                 wait_for_diagnostics,
                 action,
+                map_root_from=args.map_root_from,
+                map_root_to=args.map_root_to,
             )
             render_output("diagnostics", result, args.json, args.pretty)
             return 0
@@ -1393,6 +1442,8 @@ def main() -> int:
                 args.timeout,
                 wait_for_diagnostics,
                 action,
+                map_root_from=args.map_root_from,
+                map_root_to=args.map_root_to,
             )
             render_output("all", result, args.json, args.pretty)
             return 0

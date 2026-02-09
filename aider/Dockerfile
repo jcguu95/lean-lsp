@@ -2,9 +2,8 @@ FROM paulgauthier/aider-full
 
 USER root
 
-ENV ELAN_HOME=/opt/elan
-ENV PATH="${ELAN_HOME}/bin:${PATH}"
-
-RUN mkdir -p ${ELAN_HOME} && chmod 777 ${ELAN_HOME}
-
-RUN curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --no-modify-path
+# Copy the wrapper scripts into the container's PATH.
+# These wrappers will forward calls to the host via the `lean-exec` proxy.
+COPY bin/lean /usr/local/bin/lean
+COPY bin/lake /usr/local/bin/lake
+RUN chmod +x /usr/local/bin/lean /usr/local/bin/lake

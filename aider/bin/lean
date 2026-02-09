@@ -1,0 +1,5 @@
+#!/bin/sh
+# Wrapper for the 'lean' command.
+# Forwards execution to the host via the lean-exec script.
+# The `lean-exec` client defaults to connecting to `host.docker.internal`.
+/app/bin/lean-exec exec lean "$@"

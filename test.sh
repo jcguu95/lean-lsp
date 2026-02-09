@@ -17,7 +17,7 @@ HOST_PROJECT_PATH=${1:-"/Users/jin/lean-lsp"}
 
 # Name of the Docker image to use for the test. This should be an image
 # that has this repository's code available at /app.
-DOCKER_IMAGE_NAME="aider-chat"
+DOCKER_IMAGE_NAME="lean-aider"
 
 # --- Script ---
 
@@ -88,7 +88,10 @@ if ! docker info > /dev/null 2>&1; then
     exit 0
 fi
 
-DOCKER_OUTPUT=$(docker run --rm -v "$HOST_PROJECT_PATH":/app "$DOCKER_IMAGE_NAME" \
+DOCKER_OUTPUT=$(docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$HOST_PROJECT_PATH":/app \
+  "$DOCKER_IMAGE_NAME" \
   /app/lean-lsp hover --host host.docker.internal \
   --map-root-from /app \
   --map-root-to "$HOST_PROJECT_PATH" \

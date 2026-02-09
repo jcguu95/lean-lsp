@@ -86,6 +86,8 @@ The repository includes a "one-click" test script to verify that the entire clie
     ```
     The script will set up the `example-project`, start the server, run both test queries, and shut down the server. If everything is configured correctly, you should see "✅ Host Test PASSED" and "✅ Docker Test PASSED".
 
+    **Note on Docker:** The Docker test assumes you have a Docker image named `lean-aider` available, which contains the `lean-lsp` script at `/app`.
+
 ## Manual Usage
 
 If you want to run the server and client commands manually, follow these instructions.

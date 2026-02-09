@@ -7,9 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-- Refactored `CHANGELOG.md` into a main file with links to version-specific files in the `changelog/` directory.
-
 ## Past Releases
 
 - [Version 0.6](changelog/v0.6.md)

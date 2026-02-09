@@ -14,6 +14,12 @@ To build the `aider-lean` Docker image, run the following command from **this di
 docker build -t aider-lean -f Dockerfile ..
 ```
 
+### A Note on the Build Context
+
+This command uses `..` to set the "build context" to the root of the repository. This is necessary so that the `Dockerfile` can `COPY` the `bin/` directory into the image.
+
+For the build to be fast, a `.dockerignore` file is placed in the repository root to exclude large directories like `.git` and `.lake/` from the build context. This is a standard practice and is the most effective way to manage build performance while allowing the `Dockerfile` to access necessary files from the repository.
+
 **Note:** The first build will take a significant amount of time (20-30 minutes) as it downloads and compiles `mathlib`. Subsequent builds will be much faster due to Docker's caching.
 
 ## Testing the Environment

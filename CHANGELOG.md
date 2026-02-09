@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Created `project-1` and completed the proof for `sum_of_first_n_odd_numbers`.
 
+### Changed
+- Updated `test.sh` to set up and run tests against both `example-project` and `project-1`.
+
 ## [0.5.0] - 2026-02-09
 
 This release establishes a stable, verifiable client-server architecture for interacting with the Lean LSP. The primary focus has been on creating a robust development and testing workflow that allows an agent within a Docker container to communicate with a Lean server running on the host machine.

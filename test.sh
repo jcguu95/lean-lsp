@@ -24,7 +24,7 @@ DOCKER_IMAGE_NAME="lean-aider"
 # Ensure we are running from the project root.
 cd "$(dirname "$0")"
 
-# 1. Set up the example project
+# --- Setup ---
 echo "--- 1. Setting up example project ---"
 (
     cd example-project
@@ -43,72 +43,112 @@ echo "--- 1. Setting up example project ---"
 echo "Setup complete."
 echo
 
-# 2. Start the server in the background
-echo "--- 2. Starting server ---"
-(cd example-project && ../lean-lsp start --host 0.0.0.0)
+echo "--- 2. Setting up project-1 ---"
+(
+    cd project-1
+    if [ ! -d ".lake/packages/mathlib" ]; then
+        echo "Mathlib not found, running full setup (this may take a few minutes)..."
+        rm -f lake-manifest.json
+        lake update
+        lake exe mathlib/cache get
+        lake build
+    else
+        echo "Mathlib found, running a quick build..."
+        lake build
+    fi
+)
+echo "Setup complete."
+echo
 
-# 3. Define a cleanup function to stop the server when the script exits.
+
+# --- Test Suite ---
+# Define a cleanup function to stop the server when the script exits.
 cleanup() {
     echo
-    echo "--- 7. Stopping server ---"
+    echo "--- Stopping any running server ---"
     # Use || true to prevent the script from exiting with an error if the server is already stopped.
     ./lean-lsp stop --host 0.0.0.0 || true
 }
 trap cleanup EXIT
 
-# The `start` command waits for the daemon to be ready, so we don't need an extra sleep.
-echo "Server started."
-echo
+# --- Run example-project tests ---
+echo "--- Running tests for example-project ---"
+(cd example-project && ../lean-lsp start --host 0.0.0.0)
+echo "Server started for example-project."
 
-# 4. Run the host test query
-echo "--- 3. Running host test query ---"
+# Host test
+echo "--- Running host test query for example-project ---"
 OUTPUT=$(./lean-lsp hover --host 127.0.0.1 example-project/ExampleProject.lean 4 34)
-
-echo
-echo "--- 4. Checking host test result ---"
-echo "Received output from server:"
-echo "---------------------------"
-echo "$OUTPUT"
-echo "---------------------------"
-
-# Check if the output contains the expected string for `Nat.Prime`.
 if [[ "$OUTPUT" == *"Nat.Prime"* ]]; then
-  echo "✅ Host Test PASSED"
+  echo "✅ Host Test PASSED for example-project"
 else
-  echo "❌ Host Test FAILED: Output did not contain 'Nat.Prime'"
+  echo "❌ Host Test FAILED for example-project: Output did not contain 'Nat.Prime'"
   exit 1
 fi
-echo
 
-# 5. Run the Docker test query
-echo "--- 5. Running Docker test query ---"
-# Check if Docker is running
+# Docker test
+echo "--- Running Docker test query for example-project ---"
 if ! docker info > /dev/null 2>&1; then
     echo "⚠️  Docker is not running. Skipping Docker test."
-    exit 0
-fi
-
-DOCKER_OUTPUT=$(docker run --rm \
-  --user "$(id -u):$(id -g)" \
-  --entrypoint /app/lean-lsp \
-  -v "$HOST_PROJECT_PATH":/app \
-  "$DOCKER_IMAGE_NAME" \
-  hover --host host.docker.internal \
-  --map-root-from /app \
-  --map-root-to "$HOST_PROJECT_PATH" \
-  example-project/ExampleProject.lean 4 34)
-
-echo
-echo "--- 6. Checking Docker test result ---"
-echo "Received output from server via Docker:"
-echo "---------------------------"
-echo "$DOCKER_OUTPUT"
-echo "---------------------------"
-
-# Check if the output contains the expected string for `Nat.Prime`.
-if [[ "$DOCKER_OUTPUT" == *"Nat.Prime"* ]]; then
-  echo "✅ Docker Test PASSED"
 else
-  echo "❌ Docker Test FAILED: Output did not contain 'Nat.Prime'"
+    DOCKER_OUTPUT=$(docker run --rm \
+      --user "$(id -u):$(id -g)" \
+      --entrypoint /app/lean-lsp \
+      -v "$HOST_PROJECT_PATH":/app \
+      "$DOCKER_IMAGE_NAME" \
+      hover --host host.docker.internal \
+      --map-root-from /app \
+      --map-root-to "$HOST_PROJECT_PATH" \
+      example-project/ExampleProject.lean 4 34)
+
+    if [[ "$DOCKER_OUTPUT" == *"Nat.Prime"* ]]; then
+      echo "✅ Docker Test PASSED for example-project"
+    else
+      echo "❌ Docker Test FAILED for example-project: Output did not contain 'Nat.Prime'"
+      exit 1
+    fi
+fi
+./lean-lsp stop --host 0.0.0.0
+echo "Server stopped for example-project."
+echo
+
+# --- Run project-1 tests ---
+echo "--- Running tests for project-1 ---"
+(cd project-1 && ../lean-lsp start --host 0.0.0.0)
+echo "Server started for project-1."
+
+# Host test
+echo "--- Running host test query for project-1 ---"
+OUTPUT=$(./lean-lsp hover --host 127.0.0.1 project-1/SumOfOdd.lean 8 5)
+if [[ "$OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
+  echo "✅ Host Test PASSED for project-1"
+else
+  echo "❌ Host Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
   exit 1
 fi
+
+# Docker test
+echo "--- Running Docker test query for project-1 ---"
+if ! docker info > /dev/null 2>&1; then
+    echo "⚠️  Docker is not running. Skipping Docker test."
+else
+    DOCKER_OUTPUT=$(docker run --rm \
+      --user "$(id -u):$(id -g)" \
+      --entrypoint /app/lean-lsp \
+      -v "$HOST_PROJECT_PATH":/app \
+      "$DOCKER_IMAGE_NAME" \
+      hover --host host.docker.internal \
+      --map-root-from /app \
+      --map-root-to "$HOST_PROJECT_PATH" \
+      project-1/SumOfOdd.lean 8 5)
+
+    if [[ "$DOCKER_OUTPUT" == *"sum_of_first_n_odd_numbers"* ]]; then
+      echo "✅ Docker Test PASSED for project-1"
+    else
+      echo "❌ Docker Test FAILED for project-1: Output did not contain 'sum_of_first_n_odd_numbers'"
+      exit 1
+    fi
+fi
+# Final server stop is handled by the cleanup trap
+echo
+echo "--- All tests passed! ---"

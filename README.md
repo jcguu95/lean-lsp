@@ -35,7 +35,7 @@ To communicate with the server running on the host, you will need the host's IP 
 
 Run client commands by specifying the host:
 ```bash
-./lean-lsp --host host.docker.internal hover path/to/MyTheorem.lean 10 5
+./lean-lsp hover --host host.docker.internal path/to/MyTheorem.lean 10 5
 ```
 
 This will connect to the server on the host machine and execute the `hover` command.

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added path mapping flags (`--map-root-from`, `--map-root-to`) to support client/server running on different filesystems (e.g. Docker container and host).
 
 ### Changed
+- Updated the test project to use a standard definition instead of `#check` to get more reliable hover info from the server.
 - Updated `README.md` to include a `lake build` step to ensure dependencies are loaded by the server.
 - Updated `README.md` with more robust instructions for downloading dependencies and using the `mathlib` cache.
 - Updated `README.md` to clarify that client commands must be run from the project root.

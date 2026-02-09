@@ -64,11 +64,11 @@ Before you can run `lake exe cache`, you must download the dependency and build 
     ```
     This will download and unpack the pre-compiled files for `mathlib`, making them available to the Lean server.
 
-## Testing the Setup
+## Quick Start: Verifying Your Setup
 
-The repository includes a "one-click" test script to verify that the entire client-server setup is working correctly. It runs two tests:
-1.  A **host-only** test to verify local functionality.
-2.  A **Docker-based** test that simulates the agent's environment, verifying cross-boundary communication.
+Before proceeding, run the automated test script to ensure your environment is configured correctly. This is a critical first step.
+
+The script verifies the entire toolchain: it sets up the example project, starts the Lean LSP server, and runs tests from both the host and a Docker container to confirm communication.
 
 1.  **Make the script executable:**
     ```bash
@@ -80,13 +80,53 @@ The repository includes a "one-click" test script to verify that the entire clie
     ```bash
     ./test.sh
     ```
-    The script is pre-configured with a default host path. If the Docker test fails, or if you are not running in the original user's environment, you may need to provide the absolute path to this repository on your host machine as an argument:
-    ```bash
-    ./test.sh /path/to/your/lean-lsp
-    ```
-    The script will set up the `example-project`, start the server, run both test queries, and shut down the server. If everything is configured correctly, you should see "✅ Host Test PASSED" and "✅ Docker Test PASSED".
+    You should see "✅ Host Test PASSED" and "✅ Docker Test PASSED". If the test succeeds, you are ready to start working with the agent.
 
-    **Note on Docker:** The Docker test assumes you have a Docker image named `lean-aider` available, which contains the `lean-lsp` script at `/app`.
+    **Troubleshooting:**
+    - The script is pre-configured with a default host path (`/Users/jin/lean-lsp`). If the Docker test fails, you may need to provide the absolute path to this repository on your machine: `./test.sh /path/to/your/lean-lsp`.
+    - The Docker test requires a Docker image named `lean-aider` which has this repository's code available at `/app`.
+
+## Agent Workflow
+
+Once your setup is verified, the workflow involves two main steps running in separate terminals:
+
+### Step 1: Run the Lean LSP Server (on your host machine)
+
+The `lean-lsp` server must be running in the background for the agent to connect to. It needs to be run from within a Lean project directory.
+
+For the included example, navigate to the `example-project` directory and start the server:
+```bash
+cd example-project
+../lean-lsp start --host 0.0.0.0
+```
+The server will start and listen for connections. You can leave this terminal window open.
+
+### Step 2: Run the Agent (in a Docker container)
+
+With the server running, you can now start an interactive session with the agent. In a new terminal, run the following command from the root of this repository.
+
+Make sure to replace `AIza...` with your actual Gemini API key.
+
+```bash
+docker_args=(
+    run -it                                   # Start in interactive mode with a TTY
+    --rm                                      # Automatically remove the container when it exits
+    --user "$(id -u):$(id -g)"                # Run as the current user to avoid file permission issues
+    --volume "$(pwd):/app"                    # Mount the current directory into the container
+    --env GIT_AUTHOR_NAME="$(git config user.name)"
+    --env GIT_AUTHOR_EMAIL="$(git config user.email)"
+    --env GIT_COMMITTER_NAME="$(git config user.name)"
+    --env GIT_COMMITTER_EMAIL="$(git config user.email)"
+    --env GEMINI_API_KEY="AIza..."
+
+    lean-aider
+    --model gemini/gemini-2.5-pro             # Specify the main model
+    --no-stream                               # Disable streaming output for cleaner responses
+    --weak-model gemini/gemini-2.0-flash-lite # Specify a weaker model for simpler tasks
+)
+docker "${docker_args[@]}"
+```
+The agent will now be able to use the `lean-lsp` script to communicate with the Lean server running on your host.
 
 ## Manual Usage
 

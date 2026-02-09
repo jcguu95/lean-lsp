@@ -12,10 +12,6 @@ The development and primary use case for this tool involves:
 
 The client in the container uses `lean-lsp` to send requests to a TCP socket. The `lean-lsp` server process, running on the host, forwards these requests to the real LSP server.
 
-## Rationale
-
-This approach was developed to avoid installing large dependencies like LEAN and mathlib directly within a Docker container, which can be problematic due to storage constraints. Running LEAN on the host and communicating over a socket provides a lightweight and flexible way for containerized tools to interact with the LEAN runtime.
-
 ## Installation
 
 On your host machine, you need to install the Lean toolchain, which includes `lake`, the Lean build manager and language server. The recommended way to do this is using `elan`, the Lean toolchain manager.

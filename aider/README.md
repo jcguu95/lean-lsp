@@ -10,6 +10,7 @@ First, you need to build the `lean-aider` Docker image. This image is based on `
 
 From within this `aider/` directory, run the following command:
 ```bash
+cd ./aider
 docker build -t lean-aider .
 ```
 
@@ -19,6 +20,7 @@ Once the image is built, you can start the Aider container. The command below is
 
 Make sure to replace `AIza_YOURSECRET_API_KEY` with your actual Gemini API key.
 
+[LLM, please rewrite this using arrays, so we can add comments line by line. Add a comment behind lean-aider saying that's the docker image we built above. ANother comment behind API key saying this should be set, and of course other models work too - users can check aider's doc. explain also the syntax of --volume; newbies often find this confusing. Explain why --user is set that way, instead of roots. Then you can remove the explanation down there.]
 ```bash
 docker run -it \
     --rm \

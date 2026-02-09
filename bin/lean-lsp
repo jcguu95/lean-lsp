@@ -441,12 +441,19 @@ def serve(
         server.close()
 
 
+def resolve_connect_address(address: tuple[str, int]) -> tuple[str, int]:
+    host, port = address
+    if host == "0.0.0.0":
+        host = "127.0.0.1"
+    return host, port
+
+
 def ping_socket(address: tuple[str, int], timeout: float = 1.0) -> bool:
     payload = json.dumps({"op": "ping"}, separators=(",", ":")).encode("utf-8")
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(timeout)
-            sock.connect(address)
+            sock.connect(resolve_connect_address(address))
             sock.sendall(payload)
             sock.shutdown(socket.SHUT_WR)
             chunks: list[bytes] = []
@@ -627,7 +634,7 @@ def send_payload(
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             if read_timeout is not None:
                 sock.settimeout(read_timeout)
-            sock.connect(address)
+            sock.connect(resolve_connect_address(address))
             sock.sendall(data)
             sock.shutdown(socket.SHUT_WR)
             chunks: list[bytes] = []
